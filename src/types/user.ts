@@ -6,3 +6,8 @@ export interface UserProps extends Document {
 	password: string;
 	role: string;
 }
+
+export interface SignInProps {
+	email: string;
+	password: string;
+}

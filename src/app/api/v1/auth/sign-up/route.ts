@@ -65,6 +65,22 @@ export async function POST(req: Request) {
 			{ status: 201 }
 		);
 	} catch (error) {
+		if (error instanceof z.ZodError) {
+			logger.warn("validation error during user creation", {
+				status: 400,
+				error: error.errors,
+			});
+			return NextResponse.json(
+				{
+					message: "Validation failed",
+					errors: error.errors,
+				},
+				{
+					status: 400,
+				}
+			);
+		}
+
 		logger.error("user creation failed ", {
 			error: error instanceof Error ? error.message : String(error),
 		});

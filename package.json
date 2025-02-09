@@ -9,19 +9,26 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
+		"@hookform/resolvers": "^3.10.0",
+		"@tanstack/react-query": "^5.66.0",
+		"@tanstack/react-query-devtools": "^5.66.0",
 		"@types/bcryptjs": "^2.4.6",
 		"@types/jsonwebtoken": "^9.0.8",
+		"axios": "^1.7.9",
 		"bcryptjs": "^2.4.3",
 		"chalk": "^5.4.1",
 		"jsonwebtoken": "^9.0.2",
 		"loglevel": "^1.9.2",
+		"lucide-react": "^0.475.0",
 		"mongoose": "^8.10.0",
 		"next": "15.1.6",
 		"next-auth": "^5.0.0-beta.25",
 		"next-cloudinary": "^6.16.0",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
+		"react-hook-form": "^7.54.2",
 		"slugify": "^1.6.6",
+		"sonner": "^1.7.4",
 		"zod": "^3.24.1"
 	},
 	"devDependencies": {
