@@ -26,8 +26,29 @@ const userSchema: Schema = new mongoose.Schema(
 	{ timestamps: true }
 );
 
+const commentSchema: Schema = new mongoose.Schema(
+	{
+		user: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+			ref: "UserModel",
+		},
+		product: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+		},
+		comment: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: false,
+		},
+	},
+	{ timestamps: true }
+);
+
 const UserModel: Model<UserProps> =
 	mongoose.models.UserModel ||
 	mongoose.model<UserProps>("UserModel", userSchema);
 
-export { UserModel };
+const CommentModel =
+	mongoose.models.CommentModel || mongoose.model("CommentModel", commentSchema);
+export { UserModel, CommentModel };

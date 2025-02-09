@@ -1,80 +1,165 @@
-<cursorRule>
-  <title>E-commerce Store for Phone Accessories (Ghana-Based)</title>
-  <description>
-    This project is a robust, scalable e-commerce platform tailored for the Ghanaian market. It leverages modern web technologies for both front- and back-end development, integrates secure payment processing, and includes specialized features for local delivery, mobile money, and regional address formatting.
-  </description>
-  <coreTechnologies>
-    <frontend>
-      <framework>Next.js (React Framework)</framework>
-      <library>React</library>
-      <stateManagement>Zustand (for shopping cart state)</stateManagement>
-      <dataFetching>TanStack Query (React Query)</dataFetching>
-      <styling>Tailwind CSS (utility-first responsive design)</styling>
-    </frontend>
-    <backend>
-      <runtime>Node.js</runtime>
-      <api>Next.js API Routes (serverless functions for CRUD operations and payment processing)</api>
-    </backend>
-    <database>
-      <system>MongoDB</system>
-      <odm>Mongoose</odm>
-    </database>
-    <paymentGateway>
-      <integration>Stripe</integration>
-    </paymentGateway>
-    <imageManagement>
-      <platform>Cloudinary</platform>
-    </imageManagement>
-    <deliveryLogistics>
-      <services>Yango Delivery, Bolt Delivery, DHL Ghana</services>
-      <optional>Ghana Post EMS (for remote areas)</optional>
-    </deliveryLogistics>
-    <authentication>
-      <framework>NextAuth.js</framework>
-      <features>Password encryption, User roles</features>
-    </authentication>
-  </coreTechnologies>
-  <dataQueryStrategies>
-    <strategy>MongoDB Indexing on key fields (e.g., category, price, name)</strategy>
-    <strategy>Efficient Mongoose queries to reduce unnecessary data fetching</strategy>
-    <strategy>Pagination for product listings</strategy>
-    <strategy>TanStack Query caching (with configured staleTime and cacheTime)</strategy>
-    <strategy>Data transformation in API routes to minimize payload size</strategy>
-    <optional>Aggregation pipelines for complex queries</optional>
-  </dataQueryStrategies>
-  <additionalServices>
-    <cloudHosting>Vercel or Netlify (deployment)</cloudHosting>
-    <communication>
-      <sms>Ghana-specific SMS gateway integration (for order updates)</sms>
-      <whatsapp>WhatsApp Business API (for support and notifications)</whatsapp>
-      <email>Email services (e.g., SendGrid, Mailgun for transactional emails)</email>
-    </communication>
-    <versionControl>Git (hosted on GitHub, GitLab, or Bitbucket)</versionControl>
-    <testing>Jest and React Testing Library (for unit, integration, and e2e tests)</testing>
-    <monitoring>Sentry (or similar services for error tracking and performance monitoring)</monitoring>
-  </additionalServices>
-  <cloudinaryIntegration>
-    <installation>npm install cloudinary</installation>
-    <configuration>
-      Configure Cloudinary using environment variables (API key, API secret, cloud name).
-    </configuration>
-    <uploadProcess>
-      Use a Next.js API route to handle file uploads from the frontend and store resulting image URLs in MongoDB.
-    </uploadProcess>
-    <display>
-      Leverage Cloudinary’s optimization features to deliver responsive images in the React components.
-    </display>
-  </cloudinaryIntegration>
-  <ghanaSpecificRequirements>
-    <mobileMoneyIntegration>
-      MTN Mobile Money, Vodafone Cash, and AirtelTigo Cash support.
-    </mobileMoneyIntegration>
-    <localDeliveryOptions>
-      Integration with local Ghanaian delivery services.
-    </localDeliveryOptions>
-    <addressFormatting>
-      Adaptation to common Ghanaian address formats and landmarks.
-    </addressFormatting>
-    <currency>Ghanaian Cedis (GHS)</currency>
-  </ghanaSpecificRequirements>
-</cursorRule>
+Project Title: E-commerce Store for Phone Accessories (Ghana-Based)
+
+Project Description: Develop a robust, scalable e-commerce platform specifically tailored for the Ghanaian market. The platform should leverage modern web technologies for both front-end and back-end development, integrate secure payment processing with Paystack, and include features specialized for local delivery, mobile money payment options, and accurate regional address formatting. The system must be designed for high availability and maintainability. The UI must provide a seamless and intuitive user experience.
+
+Core Technologies:
+
+Frontend:
+
+Framework: Next.js (React Framework) - Essential for SSR/SSG, routing, API endpoints, and performance.
+
+Library: React - For building UI components.
+
+State Management: Zustand - For managing shopping cart state and other client-side data.
+
+Data Fetching: TanStack Query (React Query) - Essential for asynchronous state management, data fetching, and caching to optimize UX.
+
+Styling: Tailwind CSS - For utility-first responsive design. Also using Shadcn/Radix primitives where needed.
+
+Backend:
+
+Runtime: Node.js - JavaScript runtime for Next.js backend.
+
+API: Next.js API Routes - Serverless functions for handling requests, CRUD operations, and payment processing. These should be designed with clear separation of concerns.
+
+Database:
+
+System: MongoDB - NoSQL database for storing product information, user data, and orders.
+
+ODM: Mongoose - Object Data Modeling (ODM) library for defining schemas and interacting with MongoDB.
+
+Payment Gateway:
+
+Integration: Paystack - Securely process payments. Implement robust error handling and webhook integration.
+
+Image Management:
+
+Platform: Cloudinary - Cloud-based image and video management for uploading, storing, optimizing, and delivering images. Utilize transformations for responsive images.
+
+Delivery/Logistics (Ghana-Specific):
+
+Services: Yango Delivery, Bolt Delivery, DHL Ghana.
+
+Optional: Ghana Post EMS for remote areas. The system should allow for dynamic selection of delivery services based on location.
+
+Authentication:
+
+Framework: NextAuth.js - Authentication for admin panel and user sections.
+
+Features: Password encryption (bcrypt), User roles (admin, customer). Implement secure password reset functionality.
+
+Data Querying Strategies (Focus on Front-End Impact):
+
+MongoDB Indexing: Instructions: "When asked about data retrieval, always emphasize the importance of properly indexed MongoDB collections. Give examples of indexes that would benefit common queries, and how to check if a query is using an index."
+
+Efficient Mongoose Queries: Instructions: "When generating Mongoose queries, always construct them to retrieve only the necessary fields, avoiding over-fetching of data."
+
+Pagination: Instructions: "Ensure that product listings and other large datasets are paginated on the front-end, using TanStack Query for efficient data fetching and caching. Provide example code snippets of how to implement client-side pagination."
+
+TanStack Query Caching: Instructions: "Thoroughly configure TanStack Query's caching capabilities, setting appropriate staleTime and cacheTime values based on the data's volatility. Provide examples for different scenarios."
+
+Data Transformation: Instructions: "In Next.js API routes, transform data before sending it to the client. Only send the data needed for the UI to minimize payload size and improve performance. Show examples of how to format the data specifically for the UI components."
+
+Aggregation Pipelines (Optional): Instructions: "When asked about complex queries, briefly mention MongoDB aggregation pipelines as a powerful option for server-side data processing, but caution that they can add complexity."
+
+Additional Services and Integrations:
+
+Cloud Hosting/Deployment: Vercel (Recommended) or Netlify - For deploying the Next.js application. Ensure CI/CD pipeline is set up.
+
+Communication (Ghana-Specific):
+
+SMS: Integration with a Ghana-specific SMS gateway provider to send SMS messages for order updates and delivery notifications.
+
+Instructions: "Provide code samples for sending SMS messages using a hypothetical SMS gateway API. Emphasize the importance of proper error handling and message formatting."
+
+WhatsApp: WhatsApp Business API integration for customer support and proactive updates.
+
+Instructions: "Explain how to integrate with the WhatsApp Business API for customer support and notifications. Provide code snippets for sending messages and handling responses. Pay attention to rate limits and compliance requirements."
+
+Email: Email Service (e.g., SendGrid, Mailgun) for transactional emails (order confirmations, shipping updates, password resets).
+
+Instructions: "Provide guidance on setting up transactional emails using SendGrid or Mailgun, including code samples for sending emails with dynamic content."
+
+Version Control: Git (GitHub, GitLab, or Bitbucket) - For version control. Follow Gitflow or a similar branching strategy.
+
+Testing: Jest, React Testing Library - For unit, integration, and end-to-end testing.
+
+Instructions: "Outline a testing strategy for the front-end, including unit tests for components, integration tests for API interactions, and end-to-end tests for user flows."
+
+Monitoring/Logging: Sentry (or similar service) - For error tracking and performance monitoring.
+
+Instructions: "Explain how to integrate Sentry (or a similar service) for error tracking and performance monitoring. Show examples of how to capture and report errors in Next.js."
+
+Cloudinary Integration (Specific Instructions):
+
+Installation: npm install cloudinary
+
+Configuration: Securely configure Cloudinary using environment variables (API key, API secret, cloud name).
+
+Instructions: "Provide instructions on setting up Cloudinary and storing the API keys as environment variables in a Next.js project."
+
+Upload Process: Use a Next.js API route to handle file uploads from the frontend and store the resulting image URLs in MongoDB.
+
+Instructions: "Give a detailed code example of how to create a Next.js API route to handle image uploads to Cloudinary, including error handling and security considerations. The API should accept base64 encoded images."
+
+Display: Leverage Cloudinary's optimization features (e.g., transformations, responsive images) to deliver optimized images in the React components.
+
+Instructions: "Show how to use Cloudinary's transformations to generate responsive images and deliver them in React components. Explain how to use the <Image> component from next/image in conjunction with Cloudinary."
+
+Ghana-Specific Requirements (Crucial):
+
+Mobile Money Integration (Paystack): MTN Mobile Money, Vodafone Cash, AirtelTigo Cash support via Paystack.
+
+Instructions: "Provide code examples for integrating Paystack's Mobile Money payment options into a React component. Include error handling and success callbacks."
+
+Local Delivery Options: Integration with local Ghanaian delivery services (Yango Delivery, Bolt Delivery, DHL Ghana).
+
+Instructions: "Explain how to integrate with the APIs of local delivery services. Design a system that allows users to select their preferred delivery service based on location and availability. Provide code examples for fetching delivery rates and creating orders."
+
+Address Formatting: Adapt to common Ghanaian address formats and landmarks.
+
+Instructions: "Provide a React component that allows users to enter their Ghanaian address, including fields for landmarks and specific location details. Include client-side validation and formatting."
+
+Currency: Ghanaian Cedis (GHS).
+
+Instructions: "Ensure that all prices are displayed in GHS format. Provide a utility function for formatting numbers as currency in GHS."
+
+Coding Guidelines (Crucial – Enforce These):
+
+Early Returns: Use early returns whenever possible to make the code more readable.
+
+Tailwind CSS Styling: Always use Tailwind classes for styling HTML elements; avoid using CSS or <style> tags.
+
+Class Instead of Ternary: Use "class:" instead of the ternary operator in class tags whenever possible.
+
+Descriptive Names: Use descriptive variable and function/const names.
+
+Handle Prefix: Event functions should be named with a "handle" prefix, like handleClick for onClick and handleKeyDown for onKeyDown.
+
+Accessibility Attributes: Implement accessibility features on elements. For example, <a> tag should have a tabindex="0", aria-label, on:click, and on:keydown, and similar attributes.
+
+Consts Instead of Functions: Use consts instead of functions, for example, const toggle = () =>. Also, define a type if possible.
+
+TypeScript Typing: Utilize TypeScript types extensively for improved code maintainability and reduced errors.
+
+Example Tasks for Cursor AI (Use as Starting Points):
+
+"Generate a React component that implements the Paystack inline payment form for Mobile Money payments."
+
+"Create a Next.js API route that handles image uploads to Cloudinary."
+
+"Write a utility function to format a number as currency in GHS."
+
+"Develop a React component for entering a Ghanaian address, including landmark fields."
+
+"Outline a testing strategy for the product listing page, including unit, integration, and end-to-end tests."
+
+This prompt is designed to be:
+
+Extremely Detailed: Provides comprehensive context.
+
+Actionable: Includes specific instructions for Cursor AI.
+
+Constraints Aware: Clearly states coding guidelines.
+
+Task-Oriented: Suggests example tasks to get started.
