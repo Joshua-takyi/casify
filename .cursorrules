@@ -1,0 +1,80 @@
+<cursorRule>
+  <title>E-commerce Store for Phone Accessories (Ghana-Based)</title>
+  <description>
+    This project is a robust, scalable e-commerce platform tailored for the Ghanaian market. It leverages modern web technologies for both front- and back-end development, integrates secure payment processing, and includes specialized features for local delivery, mobile money, and regional address formatting.
+  </description>
+  <coreTechnologies>
+    <frontend>
+      <framework>Next.js (React Framework)</framework>
+      <library>React</library>
+      <stateManagement>Zustand (for shopping cart state)</stateManagement>
+      <dataFetching>TanStack Query (React Query)</dataFetching>
+      <styling>Tailwind CSS (utility-first responsive design)</styling>
+    </frontend>
+    <backend>
+      <runtime>Node.js</runtime>
+      <api>Next.js API Routes (serverless functions for CRUD operations and payment processing)</api>
+    </backend>
+    <database>
+      <system>MongoDB</system>
+      <odm>Mongoose</odm>
+    </database>
+    <paymentGateway>
+      <integration>Stripe</integration>
+    </paymentGateway>
+    <imageManagement>
+      <platform>Cloudinary</platform>
+    </imageManagement>
+    <deliveryLogistics>
+      <services>Yango Delivery, Bolt Delivery, DHL Ghana</services>
+      <optional>Ghana Post EMS (for remote areas)</optional>
+    </deliveryLogistics>
+    <authentication>
+      <framework>NextAuth.js</framework>
+      <features>Password encryption, User roles</features>
+    </authentication>
+  </coreTechnologies>
+  <dataQueryStrategies>
+    <strategy>MongoDB Indexing on key fields (e.g., category, price, name)</strategy>
+    <strategy>Efficient Mongoose queries to reduce unnecessary data fetching</strategy>
+    <strategy>Pagination for product listings</strategy>
+    <strategy>TanStack Query caching (with configured staleTime and cacheTime)</strategy>
+    <strategy>Data transformation in API routes to minimize payload size</strategy>
+    <optional>Aggregation pipelines for complex queries</optional>
+  </dataQueryStrategies>
+  <additionalServices>
+    <cloudHosting>Vercel or Netlify (deployment)</cloudHosting>
+    <communication>
+      <sms>Ghana-specific SMS gateway integration (for order updates)</sms>
+      <whatsapp>WhatsApp Business API (for support and notifications)</whatsapp>
+      <email>Email services (e.g., SendGrid, Mailgun for transactional emails)</email>
+    </communication>
+    <versionControl>Git (hosted on GitHub, GitLab, or Bitbucket)</versionControl>
+    <testing>Jest and React Testing Library (for unit, integration, and e2e tests)</testing>
+    <monitoring>Sentry (or similar services for error tracking and performance monitoring)</monitoring>
+  </additionalServices>
+  <cloudinaryIntegration>
+    <installation>npm install cloudinary</installation>
+    <configuration>
+      Configure Cloudinary using environment variables (API key, API secret, cloud name).
+    </configuration>
+    <uploadProcess>
+      Use a Next.js API route to handle file uploads from the frontend and store resulting image URLs in MongoDB.
+    </uploadProcess>
+    <display>
+      Leverage Cloudinary’s optimization features to deliver responsive images in the React components.
+    </display>
+  </cloudinaryIntegration>
+  <ghanaSpecificRequirements>
+    <mobileMoneyIntegration>
+      MTN Mobile Money, Vodafone Cash, and AirtelTigo Cash support.
+    </mobileMoneyIntegration>
+    <localDeliveryOptions>
+      Integration with local Ghanaian delivery services.
+    </localDeliveryOptions>
+    <addressFormatting>
+      Adaptation to common Ghanaian address formats and landmarks.
+    </addressFormatting>
+    <currency>Ghanaian Cedis (GHS)</currency>
+  </ghanaSpecificRequirements>
+</cursorRule>
