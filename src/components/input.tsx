@@ -1,49 +1,48 @@
 "use client";
+import React from "react";
+import { UseFormRegisterReturn } from "react-hook-form";
 
 interface InputProps {
+	type?: "textarea" | "text" | "email" | "password" | string;
 	label: string;
-	name: string;
-	value: string | number | null; // Allow null but handle it properly
-	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-	placeholder?: string;
-	required?: boolean;
-	type?: string;
+	register: UseFormRegisterReturn;
 	error?: string;
+	onChange?: (
+		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+	) => void;
 }
 
-export const FormInput = ({
-	label,
-	name,
-	value,
-	onChange,
-	placeholder,
-	required,
+const FormInput: React.FC<InputProps> = ({
 	type = "text",
+	label,
+	register,
 	error,
-}: InputProps) => {
+	onChange,
+}) => {
 	return (
-		<div className="space-y-2">
-			<label htmlFor={name} className="text-sm font-medium text-gray-700">
-				{label} {required && <span className="text-red-500">*</span>}
-			</label>
-			<input
-				type={type}
-				name={name}
-				value={value ?? ""} // If value is null, use an empty string instead
-				onChange={onChange}
-				className={`w-full p-3 border ${
-					error ? "border-red-500" : "border-gray-200"
-				} rounded-lg outline-none transition-all`}
-				placeholder={placeholder}
-				required={required}
-				aria-invalid={!!error}
-				aria-describedby={error ? `${name}-error` : undefined}
-			/>
-			{error && (
-				<p id={`${name}-error`} className="text-red-500 text-sm">
-					{error}
-				</p>
+		<div className="flex flex-col gap-2">
+			<label className="text-sm font-medium text-gray-700">{label}</label>
+			{type === "textarea" ? (
+				<textarea
+					{...register}
+					onChange={onChange}
+					className={`p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+						error ? "border-red-500" : "border-gray-200"
+					}`}
+				/>
+			) : (
+				<input
+					type={type}
+					{...register}
+					onChange={onChange}
+					className={`p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+						error ? "border-red-500" : "border-gray-200"
+					}`}
+				/>
 			)}
+			{error && <p className="text-sm text-red-500">{error}</p>}
 		</div>
 	);
 };
+
+export default FormInput;

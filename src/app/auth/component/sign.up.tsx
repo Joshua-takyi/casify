@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import FormInput from "@/components/formInput";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +8,7 @@ import { SignUpAction } from "@/server/action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import FormInput from "@/components/input";
 const Schema = z.object({
 	name: z.string().min(5, { message: "Name must be at least 5 characters" }),
 	email: z.string().email({ message: "Invalid email address" }),
@@ -138,7 +138,7 @@ export default function SignUp() {
 					<button
 						type="submit"
 						disabled={isSubmitting || isPending}
-						className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+						className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 					>
 						{isSubmitting || isPending
 							? "Creating account..."

@@ -33,7 +33,7 @@ export const FormDynamicList = ({
 						type="text"
 						value={item}
 						onChange={(e) => onChangeItem(index, e.target.value)}
-						className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+						className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-hidden transition-all"
 						placeholder={placeholder}
 						aria-label={`${label} ${index + 1}`}
 					/>

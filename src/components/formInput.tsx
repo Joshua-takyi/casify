@@ -33,7 +33,7 @@ export const FormInput = ({
 				onChange={onChange}
 				className={`w-full p-3 border ${
 					error ? "border-red-500" : "border-gray-200"
-				} rounded-lg outline-none transition-all`}
+				} rounded-lg outline-hidden transition-all`}
 				placeholder={placeholder}
 				required={required}
 				aria-invalid={!!error}

@@ -2,19 +2,21 @@
 
 import { useState } from "react";
 import { z } from "zod";
-import { useTransition } from "react"; // Import useTransition
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+
+import { SelectCategories, SelectedTags } from "@/database/db";
+import { AddProduct } from "@/server/action";
 import Wrapper from "@/components/wrapper";
-import { FormInput } from "@/components/input";
+import { FormCheckbox } from "@/components/checkBox";
 import { FormTextarea } from "@/components/textarea";
-import { FormDateTimeInput } from "@/components/timeSelect";
 import { FormSelect } from "@/components/select";
+import { FormDateTimeInput } from "@/components/timeSelect";
 import { FormColors } from "@/components/colorSelect";
 import { FormDynamicList } from "@/components/dynamicList";
-import { SelectCategories, SelectedTags } from "@/database/db";
 import { FormImageUpload } from "@/components/imageUpload";
-import { AddProduct } from "@/server/action"; // Import the Server Action
-import { FormCheckbox } from "@/components/checkBox";
+import { ProductPropsForDb } from "@/types/products";
+import { FormInput } from "@/components/formInput";
 
 // Custom error types
 type ApiError = {
@@ -46,7 +48,7 @@ const productSchema = z
 			.min(0, "Stock cannot be negative"),
 		salesStartAt: z.string().nullable().optional(), // Make it optional and nullable
 		salesEndAt: z.string().nullable().optional(), // Make it optional and nullable
-		image: z
+		images: z
 			.array(z.string().url("Invalid image URL"))
 			.min(1, "At least one image is required")
 			.max(10, "Cannot exceed 10 images"),
@@ -98,7 +100,7 @@ const initialValues: ProductFormData = {
 	stock: 0,
 	salesStartAt: "",
 	salesEndAt: "",
-	image: [],
+	images: [],
 	details: [],
 	features: [],
 	materials: [],
@@ -111,23 +113,67 @@ const initialValues: ProductFormData = {
 
 export default function ProductForm() {
 	const [data, setData] = useState<ProductFormData>(initialValues);
-	const [isPending, startTransition] = useTransition(); // Use useTransition
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const isSubmitting = isPending; // Derive isSubmitting state
+	const { mutate } = useMutation({
+		mutationKey: ["addProduct"],
+		mutationFn: async (formData: ProductFormData) => {
+			try {
+				// Convert date strings to Date objects or undefined
+				const salesStartAt = formData.salesStartAt
+					? new Date(formData.salesStartAt)
+					: undefined;
+				const salesEndAt = formData.salesEndAt
+					? new Date(formData.salesEndAt)
+					: undefined;
 
-	const validateDates = (startDate: string, endDate: string): string | null => {
-		const start = new Date(startDate);
-		const end = new Date(endDate);
-		const now = new Date();
+				// Create a new object with the converted dates
+				const formattedData: ProductPropsForDb = {
+					title: formData.title,
+					description: formData.description,
+					price: formData.price,
+					discount: formData.discount,
+					category: formData.category,
+					details: formData.details,
+					features: formData.features,
+					stock: formData.stock,
+					isOnSale: formData.isOnSale,
+					tags: formData.tags,
+					models: formData.models,
+					images: formData.images,
+					materials: formData.materials,
+					colors: formData.colors,
+					salesStartAt: salesStartAt,
+					salesEndAt: salesEndAt,
+				};
 
-		if (start < now) {
-			return "Sale start date cannot be in the past";
-		}
-		if (end <= start) {
-			return "Sale end date must be after start date";
-		}
-		return null;
-	};
+				const response = await AddProduct(formattedData);
+				return response.data;
+			} catch (error) {
+				const apiError = error as ApiError;
+				if (apiError.code === 11000) {
+					throw new Error(
+						"A product with this title already exists. Please choose a different title."
+					);
+				}
+				throw new Error(apiError.message || "Failed to create product");
+			}
+		},
+		onMutate: () => {
+			setIsSubmitting(true);
+		},
+		onSuccess: () => {
+			toast.success("Product added successfully");
+			setData(initialValues);
+			setIsSubmitting(false);
+		},
+		onError: (error: Error) => {
+			toast.error(error.message);
+			setIsSubmitting(false);
+		},
+	});
+
+	
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -135,31 +181,7 @@ export default function ProductForm() {
 		try {
 			// Validate form data
 			const validatedData = productSchema.parse(data);
-
-			// Additional validation for sales dates
-			if (data.isOnSale && data.salesStartAt && data.salesEndAt) {
-				const dateError = validateDates(data.salesStartAt, data.salesEndAt);
-				if (dateError) {
-					toast.error(dateError);
-					return;
-				}
-			}
-
-			// Format dates for submission
-			const formattedData = {
-				...validatedData,
-				salesStartAt: data.isOnSale ? data.salesStartAt : null,
-				salesEndAt: data.isOnSale ? data.salesEndAt : null,
-			};
-			startTransition(async () => {
-				const response = await AddProduct(formattedData);
-				if (response?.success) {
-					toast.success("Product added successfully");
-					setData(initialValues);
-				} else {
-					toast.error(response?.message || "Failed to add product");
-				}
-			});
+			mutate(validatedData);
 		} catch (error) {
 			if (error instanceof z.ZodError) {
 				error.errors.forEach((err) => {
@@ -184,7 +206,7 @@ export default function ProductForm() {
 	const handleUploadSuccess = (secure_url: string) => {
 		setData((prev) => ({
 			...prev,
-			image: [...prev.image, secure_url], // Append the new image URL to the existing array
+			images: [...prev.images, secure_url], // Append the new image URL to the existing array
 		}));
 		toast.success("Image uploaded successfully!");
 	};
@@ -193,7 +215,7 @@ export default function ProductForm() {
 	const handleDeleteImage = (index: number) => {
 		setData((prev) => ({
 			...prev,
-			image: prev.image.filter((_, i) => i !== index), // Remove the image at the specified index
+			images: prev.images.filter((_, i) => i !== index), // Remove the image at the specified index
 		}));
 		toast.success("Image deleted!");
 	};
@@ -312,21 +334,20 @@ export default function ProductForm() {
 							</div>
 						</section>
 
-						{/* Sale Information */}
 						{data.isOnSale && (
 							<section>
 								<h2 className="text-lg font-medium mb-4">Sale Information</h2>
 								<div className="grid md:grid-cols-2 gap-6">
 									<FormDateTimeInput
 										label="Sale Start"
-										value={data.salesStartAt}
+										value={(data.isOnSale && data.salesStartAt) || ""}
 										onChange={(value) =>
 											handleFieldChange("salesStartAt", value)
 										}
 									/>
 									<FormDateTimeInput
 										label="Sale End"
-										value={data.salesEndAt}
+										value={(data.isOnSale && data.salesEndAt) || ""}
 										onChange={(value) => handleFieldChange("salesEndAt", value)}
 									/>
 								</div>
@@ -335,6 +356,7 @@ export default function ProductForm() {
 
 						{/* Product Details */}
 						<section>
+							<h2 className="text-lg font-medium mb-4">Product Details</h2>
 							<div className="space-y-6">
 								<FormColors
 									colors={data.colors}
@@ -342,8 +364,7 @@ export default function ProductForm() {
 										handleFieldChange("colors", [...data.colors, color])
 									}
 									onDeleteColor={(color) => {
-										// Changed index to color
-										const newColors = data.colors.filter((c) => c !== color); // Changed splice to filter
+										const newColors = data.colors.filter((c) => c !== color);
 										handleFieldChange("colors", newColors);
 									}}
 								/>
@@ -426,7 +447,7 @@ export default function ProductForm() {
 						<section>
 							<h2 className="text-lg font-medium mb-4">Product Images</h2>
 							<FormImageUpload
-								images={data.image}
+								images={data.images}
 								onUploadSuccess={handleUploadSuccess}
 								onDeleteImage={handleDeleteImage}
 							/>

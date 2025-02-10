@@ -1,7 +1,7 @@
 "use server";
 
 import { signIn } from "@/auth";
-import { ProductProps } from "@/types/products";
+import { ProductPropsForDb } from "@/types/products";
 import { SignInProps } from "@/types/user";
 import axios, { AxiosError } from "axios";
 
@@ -139,16 +139,17 @@ export async function SignInAction(data: SignInProps) {
 		};
 	}
 }
-
 export interface ApiResponse {
 	success: boolean;
-	data?: ProductProps;
+	data?: ProductPropsForDb;
 	message?: string;
 }
 
-export async function AddProduct(data: ProductProps): Promise<ApiResponse> {
+export async function AddProduct(
+	data: ProductPropsForDb
+): Promise<ApiResponse> {
 	try {
-		// Validate required fields before making the request
+		// Validate required fields BEFORE making the request
 		if (!data.title || !data.description || data.price === undefined) {
 			throw new Error("Missing required fields");
 		}
@@ -174,55 +175,46 @@ export async function AddProduct(data: ProductProps): Promise<ApiResponse> {
 			};
 		}
 
-		// Handle unexpected status codes
+		// Handle unexpected status codes (let it drop to the catch block)
 		throw new Error(`Unexpected status code: ${response.status}`);
 	} catch (error) {
-		// Handle Axios errors
 		if (axios.isAxiosError(error)) {
-			const axiosError = error as AxiosError<{ message: string }>;
+			const axiosError = error as AxiosError<{ message?: string }>;
 
-			// Handle specific error status codes
-			if (axiosError.response?.status === 400) {
-				return {
-					success: false,
-					message: "Invalid product data provided",
-				};
-			}
+			let errorMessage = "Failed to add product"; // Default error message
 
-			if (axiosError.response?.status === 401) {
-				return {
-					success: false,
-					message: "Unauthorized - Please log in",
-				};
-			}
-
-			// Handle server error message if available
+			// Prioritize error message from the backend, if available
 			if (axiosError.response?.data?.message) {
-				return {
-					success: false,
-					message: axiosError.response.data.message,
-				};
+				errorMessage = axiosError.response.data.message;
+			} else if (axiosError.message) {
+				errorMessage = axiosError.message;
+			} else if (axiosError.code === "ECONNABORTED") {
+				errorMessage = "Request timed out - please try again";
 			}
 
-			// Handle network errors
-			if (axiosError.code === "ECONNABORTED") {
-				return {
-					success: false,
-					message: "Request timed out - please try again",
-				};
+			// Standardize error message based on status code (if needed)
+			switch (axiosError.response?.status) {
+				case 400:
+					errorMessage = "Invalid product data provided";
+					break;
+				case 401:
+					errorMessage = "Unauthorized - Please log in";
+					break;
+				// Add more cases as needed
 			}
 
 			return {
 				success: false,
-				message: axiosError.message || "Failed to add product",
+				message: errorMessage,
 			};
 		}
 
-		// Handle unknown errors
+		// Handle non-Axios errors
+		const errorMessage =
+			error instanceof Error ? error.message : "An unexpected error occurred";
 		return {
 			success: false,
-			message:
-				error instanceof Error ? error.message : "An unexpected error occurred",
+			message: errorMessage,
 		};
 	}
 }

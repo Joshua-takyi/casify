@@ -18,7 +18,7 @@ export const FormCheckbox = ({
 	error,
 }: FormCheckProps) => {
 	return (
-		<div className="flex items-center gap-3 p-2">
+		<div className="flex items-center gap-3 p-2 ">
 			<Checkbox
 				id={name}
 				checked={checked}

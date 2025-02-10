@@ -28,7 +28,7 @@ export const FormDateTimeInput = ({
 				onChange={(e) => onChange(e.target.value)}
 				className={`w-full p-3 border ${
 					error ? "border-red-500" : "border-gray-200"
-				} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all`}
+				} rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-hidden transition-all`}
 				placeholder={placeholder}
 				required={required}
 				aria-invalid={!!error}

@@ -31,7 +31,7 @@ export const FormTextarea = ({
 				rows={rows}
 				className={`w-full p-3 border ${
 					error ? "border-red-500" : "border-gray-200"
-				} rounded-lg focus:ring-2 focus:ring-black outline-none transition-all`}
+				} rounded-lg focus:ring-2 focus:ring-black outline-hidden transition-all`}
 				placeholder={placeholder}
 				aria-invalid={!!error}
 				aria-describedby={error ? `${name}-error` : undefined}

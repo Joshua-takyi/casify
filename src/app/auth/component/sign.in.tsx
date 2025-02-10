@@ -1,11 +1,11 @@
 "use client";
 
-import FormInput from "@/components/formInput";
 import { SignInAction } from "@/server/action";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import FormInput from "@/components/input";
 
 interface SignInFormData {
 	email: string;
@@ -76,7 +76,7 @@ export default function SignIn() {
 	};
 
 	return (
-		<main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 px-4">
+		<main className="flex min-h-screen items-center justify-center bg-linear-to-b from-gray-50 to-gray-100 px-4">
 			<div className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-8 shadow-xl transition-all">
 				<h2 className="mb-8 text-center text-3xl font-bold text-gray-900">
 					Welcome Back
@@ -150,7 +150,7 @@ export default function SignIn() {
 					<button
 						type="submit"
 						disabled={isSubmitting}
-						className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+						className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						{isSubmitting ? (
 							<span className="flex items-center justify-center gap-2">
