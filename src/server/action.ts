@@ -1,6 +1,7 @@
 "use server";
 
 import { signIn } from "@/auth";
+import { ProductProps } from "@/types/products";
 import { SignInProps } from "@/types/user";
 import axios, { AxiosError } from "axios";
 
@@ -135,6 +136,93 @@ export async function SignInAction(data: SignInProps) {
 		return {
 			success: false,
 			error: errorMessage,
+		};
+	}
+}
+
+export interface ApiResponse {
+	success: boolean;
+	data?: ProductProps;
+	message?: string;
+}
+
+export async function AddProduct(data: ProductProps): Promise<ApiResponse> {
+	try {
+		// Validate required fields before making the request
+		if (!data.title || !data.description || data.price === undefined) {
+			throw new Error("Missing required fields");
+		}
+
+		const response = await axios.post<ApiResponse>(
+			`${API_URL}/products/add-item`,
+			data,
+			{
+				headers: {
+					"Content-Type": "application/json",
+					// Add any authentication headers if needed
+					// Authorization: `Bearer ${token}`
+				},
+			}
+		);
+
+		// Check for successful response
+		if (response.status === 201) {
+			return {
+				success: true,
+				data: response.data.data,
+				message: "Product added successfully",
+			};
+		}
+
+		// Handle unexpected status codes
+		throw new Error(`Unexpected status code: ${response.status}`);
+	} catch (error) {
+		// Handle Axios errors
+		if (axios.isAxiosError(error)) {
+			const axiosError = error as AxiosError<{ message: string }>;
+
+			// Handle specific error status codes
+			if (axiosError.response?.status === 400) {
+				return {
+					success: false,
+					message: "Invalid product data provided",
+				};
+			}
+
+			if (axiosError.response?.status === 401) {
+				return {
+					success: false,
+					message: "Unauthorized - Please log in",
+				};
+			}
+
+			// Handle server error message if available
+			if (axiosError.response?.data?.message) {
+				return {
+					success: false,
+					message: axiosError.response.data.message,
+				};
+			}
+
+			// Handle network errors
+			if (axiosError.code === "ECONNABORTED") {
+				return {
+					success: false,
+					message: "Request timed out - please try again",
+				};
+			}
+
+			return {
+				success: false,
+				message: axiosError.message || "Failed to add product",
+			};
+		}
+
+		// Handle unknown errors
+		return {
+			success: false,
+			message:
+				error instanceof Error ? error.message : "An unexpected error occurred",
 		};
 	}
 }

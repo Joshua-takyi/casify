@@ -1,41 +1,38 @@
 "use client";
 
-interface InputProps {
+interface TextareaProps {
 	label: string;
 	name: string;
-	value: string | number | null; // Allow null but handle it properly
-	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	value: string;
+	onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 	placeholder?: string;
-	required?: boolean;
-	type?: string;
+	rows?: number;
 	error?: string;
 }
 
-export const FormInput = ({
+export const FormTextarea = ({
 	label,
 	name,
 	value,
 	onChange,
 	placeholder,
-	required,
-	type = "text",
+	rows = 4,
 	error,
-}: InputProps) => {
+}: TextareaProps) => {
 	return (
 		<div className="space-y-2">
 			<label htmlFor={name} className="text-sm font-medium text-gray-700">
-				{label} {required && <span className="text-red-500">*</span>}
+				{label}
 			</label>
-			<input
-				type={type}
+			<textarea
 				name={name}
-				value={value ?? ""} // If value is null, use an empty string instead
+				value={value}
 				onChange={onChange}
+				rows={rows}
 				className={`w-full p-3 border ${
 					error ? "border-red-500" : "border-gray-200"
-				} rounded-lg outline-none transition-all`}
+				} rounded-lg focus:ring-2 focus:ring-black outline-none transition-all`}
 				placeholder={placeholder}
-				required={required}
 				aria-invalid={!!error}
 				aria-describedby={error ? `${name}-error` : undefined}
 			/>

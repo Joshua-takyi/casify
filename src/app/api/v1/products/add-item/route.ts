@@ -8,7 +8,7 @@ import { ConnectDb } from "@/libs/connect";
 import slugify from "slugify";
 
 // Define the schema without `sku` and `slug` because they are auto-generated.
-const productSchema = z.object({
+export const productSchema = z.object({
 	title: z
 		.string()
 		.min(4, { message: "Title must be at least 4 characters long" }),
