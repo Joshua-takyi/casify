@@ -8,6 +8,7 @@ import { ConnectDb } from "@/libs/connect";
 import slugify from "slugify";
 
 // Define the schema without `sku` and `slug` because they are auto-generated.
+
 export const productSchema = z.object({
 	title: z
 		.string()
@@ -26,25 +27,50 @@ export const productSchema = z.object({
 		.number()
 		.int()
 		.nonnegative({ message: "Stock must be a non-negative integer" }),
-	available: z.boolean(),
 	isOnSale: z.boolean().default(false).optional(),
 	tags: z.array(z.string()),
 	models: z.array(z.string()),
 	images: z.array(z.string()),
-	salesStartAt: z.preprocess(
-		(arg) =>
-			typeof arg === "string" || arg instanceof Date
-				? new Date(arg)
-				: undefined,
-		z.date().optional().nullable()
-	),
-	salesEndAt: z.preprocess(
-		(arg) =>
-			typeof arg === "string" || arg instanceof Date
-				? new Date(arg)
-				: undefined,
-		z.date().optional().nullable()
-	),
+	isBestSeller: z.boolean().default(false).optional(),
+	isNewItem: z.boolean().default(false).optional(),
+	salesStartAt: z
+		.string()
+		.optional()
+		.nullable()
+		.refine(
+			(val) => {
+				if (!val) return true; // Allow null/undefined
+				try {
+					new Date(val);
+					return true;
+				} catch (error) {
+					return false; // Invalid date string
+				}
+			},
+			{
+				message: "Invalid sales start date format (ISO 8601 required)",
+			}
+		)
+		.transform((val) => (val ? new Date(val) : null)), // Parse to Date,
+	salesEndAt: z
+		.string()
+		.optional()
+		.nullable()
+		.refine(
+			(val) => {
+				if (!val) return true; // Allow null/undefined
+				try {
+					new Date(val);
+					return true;
+				} catch (error) {
+					return false; // Invalid date string
+				}
+			},
+			{
+				message: "Invalid sales end date format (ISO 8601 required)",
+			}
+		)
+		.transform((val) => (val ? new Date(val) : null)), // Parse to Date,
 	rating: z
 		.number()
 		.min(0, { message: "Rating must be at least 0" })

@@ -11,6 +11,8 @@ export interface ProductProps extends Document {
 	features: string[];
 	sku?: string;
 	stock: number;
+	isBestSeller?: boolean;
+	isNewItem?: boolean;
 	available?: boolean;
 	isOnSale: boolean;
 	tags: string[];
@@ -44,4 +46,15 @@ export interface ProductPropsForDb {
 	rating?: number;
 	materials: string[];
 	colors: string[];
+}
+
+export interface  ProductCardProps {
+	title?:string;
+	discount?:number;
+	path?:string;
+	tags?:string[];
+	price?:number;
+	images?:string[];
+	image:string
+	colors?:string[];
 }

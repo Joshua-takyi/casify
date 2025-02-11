@@ -4,6 +4,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+	font-family: "Apercu Pro";
+	src: url("../fonts/apercu-pro-regular.woff2") format("woff2");
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+
 @theme {
 	--radius-lg: var(--radius);
 	--radius-md: calc(var(--radius) - 2px);
@@ -42,16 +51,11 @@
 	--color-chart-3: hsl(var(--chart-3));
 	--color-chart-4: hsl(var(--chart-4));
 	--color-chart-5: hsl(var(--chart-5));
+	--font-family-apercu-pro: "Apercu Pro", sans-serif;
+
 }
 
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
 
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
 	*,
 	::after,
@@ -61,6 +65,7 @@
 		border-color: var(--color-gray-200, currentColor);
 	}
 }
+
 
 @layer base {
 	:root {
@@ -124,4 +129,46 @@
 	body {
 		@apply bg-background text-foreground;
 	}
-}
+
+	.header{
+		font-weight: bold;
+		@container (width >= 38rem) {
+			font-size: clamp(0.5rem, 2vw, 1.3rem);
+		}
+		@container (width <= 38rem) {
+			font-size: clamp(1.5rem, 2vw, 3rem);
+		}
+	}
+	h1 {
+		@container (width >= 42.6rem) {
+			font-size: clamp(3rem, 5vw, 6rem);
+		}
+
+		@container (width <= 42.6rem) {
+			font-size: clamp(2rem, 3vw, 4rem);
+		}
+	}
+	h2{
+		@container (width >= 38rem) {
+			
+		}
+	}
+	.title{
+		@container (width >= 38rem) {
+			font-size: clamp(0.8rem, 2vw, 1.3rem);
+		}
+		@container (width <= 38rem) {
+			font-size: clamp(1rem, 2vw, 1.7rem);
+		}
+	}
+	.imgBg{
+		mix-blend-mode: multiply;
+		background-color: transparent;
+	}
+}	
+
+
+
+
+
+

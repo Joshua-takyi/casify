@@ -1,8 +1,8 @@
 import React from "react";
 
-export default function Wrapper({ children }: { children: React.ReactNode }) {
+export default function Wrapper({ children,className }: { children: React.ReactNode, className?: string }) {
 	return (
-		<section className="@container mx-auto @md:px-15 px-3.5">
+		<section className={`container mx-auto md:px-24 px-3.5 ${className}`}>
 			{children}
 		</section>
 	);

@@ -6,7 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { SelectCategories, SelectedTags } from "@/database/db";
-import { AddProduct } from "@/server/action";
+// import { AddProduct } from "@/server/action";
 import Wrapper from "@/components/wrapper";
 import { FormCheckbox } from "@/components/checkBox";
 import { FormTextarea } from "@/components/textarea";
@@ -17,6 +17,7 @@ import { FormDynamicList } from "@/components/dynamicList";
 import { FormImageUpload } from "@/components/imageUpload";
 import { ProductPropsForDb } from "@/types/products";
 import { FormInput } from "@/components/formInput";
+import axios from "axios";
 
 // Custom error types
 type ApiError = {
@@ -111,87 +112,50 @@ const initialValues: ProductFormData = {
 	discount: 0,
 };
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function ProductForm() {
 	const [data, setData] = useState<ProductFormData>(initialValues);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const { mutate } = useMutation({
-		mutationKey: ["addProduct"],
-		mutationFn: async (formData: ProductFormData) => {
+	const { mutate, error } = useMutation({
+		mutationKey: ["data", data],
+		mutationFn: async () => {
 			try {
-				// Convert date strings to Date objects or undefined
-				const salesStartAt = formData.salesStartAt
-					? new Date(formData.salesStartAt)
-					: undefined;
-				const salesEndAt = formData.salesEndAt
-					? new Date(formData.salesEndAt)
-					: undefined;
-
-				// Create a new object with the converted dates
-				const formattedData: ProductPropsForDb = {
-					title: formData.title,
-					description: formData.description,
-					price: formData.price,
-					discount: formData.discount,
-					category: formData.category,
-					details: formData.details,
-					features: formData.features,
-					stock: formData.stock,
-					isOnSale: formData.isOnSale,
-					tags: formData.tags,
-					models: formData.models,
-					images: formData.images,
-					materials: formData.materials,
-					colors: formData.colors,
-					salesStartAt: salesStartAt,
-					salesEndAt: salesEndAt,
-				};
-
-				const response = await AddProduct(formattedData);
-				return response.data;
-			} catch (error) {
-				const apiError = error as ApiError;
-				if (apiError.code === 11000) {
-					throw new Error(
-						"A product with this title already exists. Please choose a different title."
-					);
+				const res = await axios.post(`${API_URL}/products/add-item`, data);
+				if (res.status !== 201) {
+					throw new Error("Failed to add data: " + res.statusText); // Improved error message
 				}
-				throw new Error(apiError.message || "Failed to create product");
+				return res.data;
+			} catch (error) {
+				if (error instanceof Error) {
+					throw new Error(`Failed to add Product: ${error.message}`); // Include original error message
+				} else {
+					throw new Error("An unexpected error occurred during product creation.");
+				}
 			}
-		},
-		onMutate: () => {
-			setIsSubmitting(true);
 		},
 		onSuccess: () => {
-			toast.success("Product added successfully");
-			setData(initialValues);
-			setIsSubmitting(false);
+			toast.success("Successfully uploaded product");
+			setData(initialValues); // Reset the form on success
 		},
-		onError: (error: Error) => {
-			toast.error(error.message);
-			setIsSubmitting(false);
+		onError: (error: any) => {
+			// Check if the error is an instance of Error and has a message property
+			if (error instanceof Error) {
+				toast.error(`Error adding product: ${error.message}`);
+			} else {
+				toast.error("An unknown error occurred."); // Handle cases where the error is not an Error object
+			}
+
+			setIsSubmitting(false); // Ensure submitting state is reset on error
+		},
+		onMutate: () => {
+			setIsSubmitting(true); // Set submitting state when mutation starts
+		},
+		onSettled: () => {
+			setIsSubmitting(false); // Reset submitting state after mutation completes (success or error)
 		},
 	});
-
-	
-
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-
-		try {
-			// Validate form data
-			const validatedData = productSchema.parse(data);
-			mutate(validatedData);
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				error.errors.forEach((err) => {
-					toast.error(`${err.path.join(".")}: ${err.message}`);
-				});
-			} else {
-				toast.error("Failed to validate form data");
-			}
-		}
-	};
 
 	const handleFieldChange = <K extends keyof ProductFormData>(
 		field: K,
@@ -201,6 +165,30 @@ export default function ProductForm() {
 			...prev,
 			[field]: value,
 		}));
+	};
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+
+		try {
+			// Validate data against schema
+			productSchema.parse(data);
+
+			// Call mutate function to trigger the API call
+			mutate();
+		} catch (validationError) {
+			if (validationError instanceof z.ZodError) {
+				// Display Zod validation errors using toast
+				validationError.errors.forEach((error) => {
+					toast.error(`${error.path.join(".")}: ${error.message}`);
+				});
+			} else {
+				// Handle other types of errors
+				toast.error("An unexpected error occurred during form validation.");
+			}
+
+			setIsSubmitting(false); // Ensure submitting state is reset on error
+		}
 	};
 
 	const handleUploadSuccess = (secure_url: string) => {
@@ -455,7 +443,7 @@ export default function ProductForm() {
 
 						<button
 							type="submit"
-							className={`w-full py-2 px-4 bg-amber-600 text-white rounded-md 
+							className={`w-full py-2 px-4 bg-amber-600 text-white rounded-md
                 ${
 									isSubmitting
 										? "opacity-50 cursor-not-allowed"

@@ -1,7 +1,7 @@
 "use server";
 
 import { signIn } from "@/auth";
-import { ProductPropsForDb } from "@/types/products";
+import {ProductCardProps, ProductPropsForDb} from "@/types/products";
 import { SignInProps } from "@/types/user";
 import axios, { AxiosError } from "axios";
 
@@ -217,4 +217,72 @@ export async function AddProduct(
 			message: errorMessage,
 		};
 	}
+}
+
+
+interface CatchAllSlugProps {
+	slug: string;
+	color?: string;
+	model?: string;
+}
+
+export async function CatchAllSlug({ slug = "", color = "", model = "" }: CatchAllSlugProps) {
+	try {
+		const res = await axios.get(`${API_URL}/products/get-item/${slug}?color=${color}&model=${model}`);
+		if (res.status === 200) {
+			return {
+				success: true,
+				data: res.data.data,
+				message: res.data.message,
+			};
+		}
+		throw new Error(`Unexpected status code: ${res.status}`);
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			const axiosError = error as AxiosError<{ message?: string }>;
+			let errorMessage = "Failed to fetch product"; // Updated message
+			if (axiosError.response?.data?.message) {
+				errorMessage = axiosError.response.data.message;
+			}
+			let statusCode = 500; // Default status code
+
+			switch (axiosError.response?.status) {
+				case 400:
+					errorMessage = "Invalid request: Bad data provided"; // More specific message
+					statusCode = 400;
+					break;
+				case 401:
+					errorMessage = "Unauthorized: Please log in"; // More user-friendly message
+					statusCode = 401;
+					break;
+				case 404:
+					errorMessage = "Product not found"; // specific
+					statusCode = 404;
+					break;
+				// You may add more cases based on API responses
+			}
+
+			return {
+				success: false,
+				message: errorMessage,
+				statusCode: statusCode,
+			};
+
+		} else {
+			// Handle non-Axios errors more generally
+			console.error("Non-Axios error:", error);
+			return {
+				success: false,
+				message: "An unexpected error occurred",
+				statusCode: 500,
+			};
+		}
+	}
+
+	// Code should not reach here, but let's provide a default return for type safety
+	return {
+		success: false,
+		message: "An unknown error occurred",
+		statusCode: 500,
+	};
 }

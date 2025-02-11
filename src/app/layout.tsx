@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/providers/queryProviders";
 import { Toaster } from "sonner";
-const geistSans = Geist({
-	variable: "--font-geist-sans",
-	subsets: ["latin"],
-});
+import localFont from "next/font/local"; // Correct import
 
-const geistMono = Geist_Mono({
-	variable: "--font-geist-mono",
-	subsets: ["latin"],
+
+
+const apercuMono = localFont({ // Correct variable name
+	src: "../fonts/apercu-mono-pro-regular.woff2",
+	display: 'swap', // Add display swap for performance.  Important for local fonts!
+	variable: '--font-apercu-mono', // Add a variable name
+});
+const apercuPro = localFont({ // Correct variable name
+	src: "../fonts/apercu-pro-regular.woff2",
+	display: 'swap', // Add display swap for performance.  Important for local fonts!
+	variable: '--font-apercu-pro', // Add a variable name
 });
 
 export const metadata: Metadata = {
@@ -31,22 +35,22 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-	children,
-}: Readonly<{
+									   children,
+								   }: Readonly<{
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
-			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-			>
-				<Toaster
-					position="top-right"
-					toastOptions={{ duration: 2000 }}
-					richColors={true}
-				/>
-				<QueryProvider>{children}</QueryProvider>
-			</body>
+		<html lang="en" suppressHydrationWarning={true}>
+		<body
+			className={`${apercuMono.className} ${apercuPro.variable} antialiased`}
+		>
+		<Toaster
+			position="top-right"
+			toastOptions={{ duration: 2000 }}
+			richColors={true}
+		/>
+		<QueryProvider>{children}</QueryProvider>
+		</body>
 		</html>
 	);
 }

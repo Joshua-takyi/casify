@@ -7,7 +7,7 @@ export default function AdminLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="flex h-screen">
+		<div className="flex h-screen font-family-apercu-pro">
 			{/* <div className=""> */}
 			<AdminSidebar />
 			{/* </div> */}
