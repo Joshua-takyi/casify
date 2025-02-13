@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn } from "@/auth";
+import {  signIn } from "@/auth";
 import { ProductPropsForDb } from "@/types/products";
 import { SignInProps } from "@/types/user";
 import axios, { AxiosError } from "axios";
@@ -285,15 +285,73 @@ export async function CatchAllSlug({
 	}
 }
 
-// interface  CartProps {
-// 	productId: string;
-// 	color: string;
-// 	quantity: number;
-// 	model: string;
-// }
+export async function AddToWishList(productId: string) {
+	try {
+		const res = await axios.post(
+			`${API_URL}/wishlist/add-wishlist`,
+			{ productId },
 
-// export async function AddToCart( {productId, quantity,color,model }:CartProps){
-// 	try {
-// 		const res= await axios.post(`${API_URL}/cart/get-cart`)
-// 	}
-// }
+			{ withCredentials: true }
+		);
+		if (res.status === 201) {
+			return {
+				success: true,
+				message: "Product added to wishlist successfully",
+			};
+		}
+		throw new Error(`Unexpected status code: ${res.status}`);
+	} catch (error) {
+		if (axios.AxiosError) {
+			const axiosError = error as AxiosError<{ message?: string }>;
+			let errorMessage = "Failed to add product to wishlist";
+			if (axiosError.response?.data?.message) {
+				errorMessage = axiosError.response.data.message;
+			}
+			return {
+				success: false,
+				message: errorMessage,
+			};
+		}
+		const errorMessage = "Failed to add product to wishlist";
+		return {
+			success: false,
+			message: errorMessage,
+		};
+	}
+}
+
+export async function RemoveFromWishlist(productId: string) {
+	try {
+		const res = await axios.delete(`${API_URL}/wishlist/remove-wishlist`, {
+			data: { productId },
+			withCredentials: true,
+		});
+		if (res.status !== 200) {
+			return {
+				success: false,
+				message: "Failed to remove product from wishlist",
+			};
+		}
+		return {
+			success: true,
+			message: "Product removed from wishlist successfully",
+		};
+	} catch (error) {
+		if (axios.AxiosError) {
+			const axiosError = error as AxiosError<{ message?: string }>;
+			let errorMessage = "Failed to remove product from wishlist";
+			if (axiosError.response?.data?.message) {
+				errorMessage = axiosError.response.data.message;
+			}
+			return {
+				success: false,
+				message: errorMessage,
+			};
+		}
+		const errorMessage = "Failed to remove product from wishlist";
+		return {
+			success: false,
+			message: errorMessage,
+		};
+	}
+}

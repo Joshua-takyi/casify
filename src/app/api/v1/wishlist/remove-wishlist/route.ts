@@ -10,9 +10,10 @@ export async function DELETE(request: Request) {
 
 		// Authentication check
 		const session = await auth();
-		const userId = session?.user?.id;
-		if (!userId) {
-			return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+		const accessToken = session?.user.accessToken;
+		const userId = session?.user.id;
+		if (!accessToken) {
+			return NextResponse.json({ message: "unauthorized" }, { status: 401 });
 		}
 
 		// Database connection

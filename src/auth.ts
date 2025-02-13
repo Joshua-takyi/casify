@@ -41,7 +41,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 						user.password as string
 					);
 					if (!comparedPassword) {
-						throw new Error("invalid email or password")
+						throw new Error("invalid email or password");
 					}
 
 					const accessToken = jwt.sign(
@@ -75,17 +75,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 		maxAge: 30 * 24 * 60 * 60, // 30 days
 	},
 	callbacks: {
-		async jwt({token, user}) {
+		async jwt({ token, user }) {
 			if (user) {
 				token.id = user.id;
 				token.role = user.role;
 				token.email = user.email;
-				token.accessToken = user.accessToken
+				token.accessToken = user.accessToken;
 			}
-			return token
+			return token;
 		},
 
-		async session({session, token}) {
+		async session({ session, token }) {
 			// Add token data to the session
 			if (token) {
 				session.user.id = token.id as string;

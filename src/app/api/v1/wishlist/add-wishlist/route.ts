@@ -3,6 +3,7 @@ import { ConnectDb } from "@/libs/connect";
 import { WishListModel, ProductModel } from "@/models/schema";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
+import logger from "@/utils/logger";
 
 /**
  * @access private
@@ -10,50 +11,54 @@ import { NextResponse } from "next/server";
  */
 export async function POST(req: Request) {
 	try {
-		const { productId } = await req.json();
-
+		// Authenticate the user.
 		const session = await auth();
 		const userId = session?.user.id;
 		if (!userId) {
-			return NextResponse.json({ message: "unauthorized" }, { status: 401 });
+			logger.error("Unauthorized access attempt: no user ID found in session", {
+				userId,
+			});
+			return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 		}
 
-		if (mongoose.connection.readyState !== 1) {
-			await ConnectDb();
-		}
-
+		// Parse request body.
+		const { productId } = await req.json();
 		if (!productId) {
+			logger.error("Bad request: 'productId' is missing.");
 			return NextResponse.json(
 				{ message: "productId is required" },
 				{ status: 400 }
 			);
 		}
 
-		// Fetch the product and validate it exists
+		// Ensure database connection.
+		if (mongoose.connection.readyState !== 1) {
+			await ConnectDb();
+		}
+
+		// Validate the product exists.
 		const product = await ProductModel.findById(productId);
 		if (!product) {
+			logger.error(`Product not found: ${productId}`);
 			return NextResponse.json(
 				{ message: "Product not found" },
 				{ status: 404 }
 			);
 		}
 
-		// First check if wishlist exists for user
+		// Retrieve or create the wishlist for the user.
 		let wishlist = await WishListModel.findOne({ userId });
-
 		if (!wishlist) {
-			// Create new wishlist if it doesn't exist
 			wishlist = new WishListModel({
 				userId,
 				products: [],
 			});
 		}
 
-		// Check if product already exists in wishlist
+		// Check if the product already exists in the wishlist.
 		const productExists = wishlist.products.some(
-			(product) => product.productId.toString() === productId
+			(item) => item.productId.toString() === productId
 		);
-
 		if (productExists) {
 			return NextResponse.json(
 				{
@@ -64,16 +69,16 @@ export async function POST(req: Request) {
 			);
 		}
 
-		// Add new product to wishlist with the slug from the product document
+		// Add the new product to the wishlist.
 		wishlist.products.push({
 			productId: productId,
-			slug: product.slug ?? "", // Use the slug from the product document
+			slug: product.slug ?? "",
 		});
 
-		// Save the updated wishlist
+		// Save the updated wishlist.
 		await wishlist.save();
 
-		// Fetch the populated wishlist
+		// Fetch and populate the wishlist.
 		const populatedWishlist = await WishListModel.findById(wishlist._id)
 			.populate("userId")
 			.populate("products.productId");
@@ -86,9 +91,10 @@ export async function POST(req: Request) {
 			{ status: 201 }
 		);
 	} catch (error) {
+		logger.error("Error adding product to wishlist:", error);
 		return NextResponse.json(
 			{
-				message: "failed to add user favorite to the wishlist",
+				message: "Failed to add product to wishlist",
 				error: error instanceof Error ? error.message : error,
 			},
 			{ status: 500 }

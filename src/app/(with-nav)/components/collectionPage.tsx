@@ -24,16 +24,15 @@ export interface Product {
 
 export default function CollectionPage() {
 	const searchParams = useSearchParams();
-	// const router = useRouter();
-	const category = searchParams.get("category") || "";
-	const limit = Number(searchParams.get("limit") || 20);
-	const page = Number(searchParams.get("page") || 1);
+	const category = searchParams.get("category") ?? "";
+	const limit = Number(searchParams.get("limit") ?? 20);
+	const page = Number(searchParams.get("page") ?? 1);
 	const minPrice = Number(searchParams.get("minPrice")) || null;
 	const maxPrice = Number(searchParams.get("maxPrice")) || null;
-	const sortBy = searchParams.get("sortBy") || null;
+	const sortBy = searchParams.get("sortBy") ?? null;
 	const onSale = searchParams.get("onSale") === "true";
 	const isNew = searchParams.get("isNew") === "true";
-	const model = searchParams.get("model") || null;
+	const model = searchParams.get("model") ?? null;
 	const discountRange = Number(searchParams.get("discountRange")) || null;
 
 	const [filters, setFilters] = useState({
@@ -143,6 +142,7 @@ export default function CollectionPage() {
 					{products.map((product) => (
 						<div key={product._id}>
 							<ProductCard
+								id={product._id}
 								title={product.title}
 								price={product.price}
 								images={product.images}

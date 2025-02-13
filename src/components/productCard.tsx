@@ -1,18 +1,36 @@
 "use client";
+
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { BookmarkIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { AddToWishList, RemoveFromWishlist } from "@/server/action";
 
-const formatPrice = (price: number, currency = "GHS") => {
+// -----------------------
+// Helper Functions
+// -----------------------
+
+// Formats a price into a currency string.
+const formatPrice = (price: number, currency = "GHS"): string => {
 	return new Intl.NumberFormat("en-GH", {
 		style: "currency",
 		currency,
 	}).format(price);
 };
 
+// Truncates long product titles.
+const formatName = (title: string): string => {
+	return title.length > 20 ? `${title.slice(0, 20)}...` : title;
+};
+
+// -----------------------
+// Props Interface
+// -----------------------
 export interface ProductCardProps {
+	id?: string; // Product ID for wishlist operations.
 	title: string;
 	price: number;
 	images: string | string[];
@@ -22,14 +40,11 @@ export interface ProductCardProps {
 	isNew?: boolean;
 }
 
-const formatName = (title: string) => {
-	if (title.length > 20) {
-		return title.slice(0, 20) + "...";
-	}
-	return title;
-};
-
-export const ProductCard = ({
+// -----------------------
+// ProductCard Component
+// -----------------------
+const ProductCard = ({
+	id,
 	title,
 	price,
 	images,
@@ -38,31 +53,102 @@ export const ProductCard = ({
 	model = "",
 	isNew = false,
 }: ProductCardProps) => {
+	// Local state for hover effect and wishlist status.
 	const [isHovered, setIsHovered] = useState(false);
 	const [isWishlist, setIsWishlist] = useState(false);
+
+	// Convert images and colors to arrays if needed.
 	const imageArray = Array.isArray(images) ? images : [images];
 	const colorArray = Array.isArray(colors) ? colors : [colors];
-	const router = useRouter();
 
+	// Hooks for navigation and react-query.
+	const router = useRouter();
+	const queryClient = useQueryClient();
+
+	// -----------------------
+	// Wishlist Mutations
+	// -----------------------
+	const { mutate: addToWishlist } = useMutation({
+		mutationKey: ["wishlist"],
+		mutationFn: async (productId: string) => {
+			try {
+				const res = await AddToWishList(productId);
+				return res;
+			} catch (error) {
+				if (error instanceof Error) {
+					throw new Error(error.message);
+				}
+			}
+		},
+		onSuccess: () => {
+			toast.success("Product added to wishlist", {
+				richColors: false,
+				duration: 1500,
+			});
+			queryClient.invalidateQueries({ queryKey: ["wishListData"] });
+		},
+		onError: (error: Error) => {
+			toast.error(error.message);
+		},
+	});
+
+	const { mutate: removeFromWishlist } = useMutation({
+		mutationKey: ["wishlist"],
+		mutationFn: async (productId: string) => {
+			try {
+				const res = await RemoveFromWishlist(productId);
+				return res;
+			} catch (error) {
+				if (error instanceof Error) {
+					throw new Error(error.message);
+				}
+			}
+		},
+		onSuccess: () => {
+			toast.success("Product removed from wishlist", {
+				richColors: false,
+				duration: 1500,
+			});
+			queryClient.invalidateQueries({ queryKey: ["wishListData"] });
+		},
+		onError: (error: Error) => {
+			toast.error(error.message);
+		},
+	});
+
+	// -----------------------
+	// Event Handlers
+	// -----------------------
+	// Toggle wishlist status and trigger appropriate mutation.
 	const handleWishlist = (e: React.MouseEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
 		setIsWishlist((prev) => !prev);
+		if (!isWishlist) {
+			addToWishlist(id);
+		} else {
+			removeFromWishlist(id);
+		}
 	};
 
-	const getColorLink = (color: string) => {
+	// Generate a URL for a product variant based on color and model.
+	const getColorLink = (color: string): string => {
 		const params = new URLSearchParams();
 		if (color) params.append("color", color);
 		if (model) params.append("model", model);
 		return `/product/get-item/${slug}?${params.toString()}`;
 	};
 
+	// Handle clicking on a color option.
 	const handleColorClick = (e: React.MouseEvent, color: string) => {
 		e.preventDefault();
 		e.stopPropagation();
 		router.push(getColorLink(color));
 	};
 
+	// -----------------------
+	// Render JSX
+	// -----------------------
 	return (
 		<Link
 			href={`/product/${slug}`}
@@ -72,7 +158,6 @@ export const ProductCard = ({
 		>
 			{/* Image Container */}
 			<div className="relative">
-				{/* Primary Product Image */}
 				<div className="relative aspect-square w-full overflow-hidden">
 					<Image
 						src={imageArray[0]}
@@ -83,8 +168,6 @@ export const ProductCard = ({
 						style={{ opacity: isHovered && imageArray.length > 1 ? 0 : 1 }}
 						priority={false}
 					/>
-
-					{/* Secondary Image */}
 					{imageArray.length > 1 && (
 						<Image
 							src={imageArray[1]}
@@ -107,7 +190,7 @@ export const ProductCard = ({
 					</div>
 				)}
 
-				{/* Bookmark Button */}
+				{/* Wishlist Toggle Button */}
 				<button
 					onClick={handleWishlist}
 					className="absolute right-2 top-2 rounded-full bg-white/80 p-1.5 backdrop-blur-sm transition-all duration-200 hover:bg-white cursor-pointer"
@@ -115,24 +198,21 @@ export const ProductCard = ({
 				>
 					<BookmarkIcon
 						className={`h-5 w-5 transition-colors duration-200 ${
-							isWishlist ? "fill-black text-black " : "text-gray-600"
+							isWishlist ? "fill-black text-black" : "text-gray-600"
 						}`}
 					/>
 				</button>
 			</div>
 
-			{/* Product Information */}
+			{/* Product Information Section */}
 			<div className="border-t border-gray-200 p-4">
 				<h3 className="text-sm font-normal text-gray-900 mb-2">
 					{formatName(title)}
 				</h3>
-
 				<div className="flex items-center justify-between">
 					<p className="text-sm font-medium text-gray-900">
 						{formatPrice(price)}
 					</p>
-
-					{/* Color Options */}
 					{colorArray.length > 0 && (
 						<div className="flex gap-1">
 							{colorArray.map((color, index) => (
