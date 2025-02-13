@@ -11,10 +11,9 @@ import { NextResponse } from "next/server";
  */
 export async function GET() {
 	try {
-        if(mongoose.connection.readyState !== 1){
-
-            await ConnectDb(); // Always connect first
-        }
+		if (mongoose.connection.readyState !== 1) {
+			await ConnectDb(); // Always connect first
+		}
 
 		const session = await auth();
 		const userId = session?.user?.id;

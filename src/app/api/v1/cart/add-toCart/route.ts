@@ -8,7 +8,7 @@ import { ProductModel, CartModel } from "@/models/schema"; // Import both Produc
 
 // Zod schema for cart item validation
 const cartSchema = z.object({
-	productId: z.string(),
+	productId: z.string().min(1),
 	color: z.string().min(1, { message: "Color is required" }),
 	quantity: z.number().min(1, { message: "Quantity must be at least 1" }),
 	model: z.string().min(1, { message: "Model is required" }),
@@ -60,7 +60,9 @@ export async function POST(req: Request) {
 		}
 
 		// Check if the product exists and is available
-		const product = await ProductModel.findById(productId);
+		const product = await ProductModel.findById(
+			new mongoose.Types.ObjectId(productId)
+		);
 
 		if (!product) {
 			logger.warn("Product not found", { productId });
@@ -143,7 +145,7 @@ export async function POST(req: Request) {
 		} else {
 			// Add new product to cart
 			cart.products.push({
-				productId: new mongoose.Schema.Types.ObjectId(productId),
+				productId: new mongoose.Types.ObjectId(productId), // Ensure productId is of ObjectId type
 				quantity: quantity,
 				color,
 				model,

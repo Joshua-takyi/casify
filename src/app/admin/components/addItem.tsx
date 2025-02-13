@@ -6,7 +6,6 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { SelectCategories, SelectedTags } from "@/database/db";
-// import { AddProduct } from "@/server/action";
 import Wrapper from "@/components/wrapper";
 import { FormCheckbox } from "@/components/checkBox";
 import { FormTextarea } from "@/components/textarea";
@@ -17,7 +16,6 @@ import { FormDynamicList } from "@/components/dynamicList";
 import { FormImageUpload } from "@/components/imageUpload";
 import { FormInput } from "@/components/formInput";
 import axios from "axios";
-
 
 const productSchema = z
 	.object({
@@ -124,7 +122,9 @@ export default function ProductForm() {
 				if (error instanceof Error) {
 					throw new Error(`Failed to add Product: ${error.message}`); // Include original error message
 				} else {
-					throw new Error("An unexpected error occurred during product creation.");
+					throw new Error(
+						"An unexpected error occurred during product creation."
+					);
 				}
 			}
 		},
@@ -300,7 +300,9 @@ export default function ProductForm() {
 									label="Categories"
 									options={SelectCategories}
 									value={data.category}
-									onChange={(value) => handleFieldChange("category", value)}
+									onChange={(value) =>
+										handleFieldChange("category", value as string[])
+									}
 									isMulti
 									required
 								/>
@@ -308,7 +310,9 @@ export default function ProductForm() {
 									label="Tags"
 									options={SelectedTags}
 									value={data.tags}
-									onChange={(value) => handleFieldChange("tags", value)}
+									onChange={(value) =>
+										handleFieldChange("tags", value as string[])
+									}
 									isMulti
 									required
 								/>

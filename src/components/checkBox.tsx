@@ -1,12 +1,11 @@
 "use client";
-
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface FormCheckProps {
 	label: string;
 	name: string;
 	checked: boolean;
-	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onChange: (e: { target: { name: string; checked: boolean } }) => void;
 	error?: string;
 }
 
@@ -17,14 +16,21 @@ export const FormCheckbox = ({
 	onChange,
 	error,
 }: FormCheckProps) => {
+	const handleChange = (checked: boolean) => {
+		onChange({
+			target: {
+				name,
+				checked,
+			},
+		});
+	};
+
 	return (
-		<div className="flex items-center gap-3 p-2 ">
+		<div className="flex items-center gap-3 p-2">
 			<Checkbox
 				id={name}
 				checked={checked}
-				onCheckedChange={(isChecked) =>
-					onChange({ target: { name, checked: isChecked as boolean } })
-				}
+				onCheckedChange={handleChange}
 				className="w-5 h-5"
 				aria-invalid={!!error}
 			/>

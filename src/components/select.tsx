@@ -106,10 +106,12 @@ export const FormSelect = ({
 			{!isMulti && value && (
 				<div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-2 rounded-md mb-3">
 					<Tag size={16} />
-					<span className="text-sm font-medium">{findLabel(value)}</span>
+					<span className="text-sm font-medium">{findLabel(value)} </span>
 					<button
 						type="button"
-						onClick={() => handleRemoveItem(value)}
+						onClick={() =>
+							handleRemoveItem(Array.isArray(value) ? value[0] : value)
+						}
 						className="hover:bg-blue-100 rounded-full p-1"
 						aria-label={`Remove ${findLabel(value)}`}
 					>

@@ -4,8 +4,7 @@ import logger from "@/utils/logger";
 import mongoose from "mongoose";
 import { ConnectDb } from "@/libs/connect";
 import slugify from "slugify";
-import {productSchema} from "@/utils/productSchema";
-
+import { productSchema } from "@/utils/productSchema";
 
 // SKU generator uses title, price, and category values.
 const generateSku = (title: string, price: number, category: string[]) => {

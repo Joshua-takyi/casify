@@ -1,7 +1,7 @@
 import { CommentProps } from "@/types/comments";
 import { ProductProps, WishListProps } from "@/types/products";
 import { ShippingProps, UserProps } from "@/types/user";
-import mongoose, { Schema, Model } from "mongoose";
+import mongoose, { Schema, Model, Types } from "mongoose";
 import { CartProps } from "@/types/cart";
 
 const userSchema: Schema<UserProps> = new mongoose.Schema(
@@ -62,12 +62,12 @@ const productSchema: Schema<ProductProps> = new mongoose.Schema(
 const commentSchema: Schema<CommentProps> = new mongoose.Schema(
 	{
 		user: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: Types.ObjectId,
 			required: true,
 			ref: "UserModel",
 		},
 		product: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: Types.ObjectId,
 			required: true,
 		},
 		comment: {
@@ -81,13 +81,13 @@ const commentSchema: Schema<CommentProps> = new mongoose.Schema(
 const cartSchema: Schema<CartProps> = new mongoose.Schema(
 	{
 		userId: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: Schema.Types.ObjectId,
 			ref: "UserModel",
 		},
 		products: [
 			{
 				productId: {
-					type: mongoose.Schema.Types.ObjectId,
+					type: Schema.Types.ObjectId,
 					ref: "ProductModel", // Corrected ref
 					required: true,
 				},
@@ -114,11 +114,12 @@ const cartSchema: Schema<CartProps> = new mongoose.Schema(
 	},
 	{ timestamps: true }
 );
+cartSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 5 * 24 * 60 * 60 });
 
 const deliverySchema: Schema<ShippingProps> = new mongoose.Schema(
 	{
 		userId: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: Types.ObjectId,
 			required: true,
 			ref: "UserModel",
 		},
@@ -164,14 +165,14 @@ const deliverySchema: Schema<ShippingProps> = new mongoose.Schema(
 const wishListSchema: Schema<WishListProps> = new Schema(
 	{
 		userId: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: Types.ObjectId,
 			required: true,
 			ref: "UserModel", // Must match your User model name
 		},
 		products: [
 			{
 				productId: {
-					type: mongoose.Schema.Types.ObjectId,
+					type: Types.ObjectId,
 					required: true,
 					ref: "ProductModel", // Must match your Product model name
 				},
@@ -186,7 +187,6 @@ const wishListSchema: Schema<WishListProps> = new Schema(
 );
 
 // TTL Index: Delete carts that haven't been updated in 5 days (5 * 24 * 60 * 60 seconds)
-cartSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 5 * 24 * 60 * 60 });
 const WishListModel: Model<WishListProps> =
 	mongoose.models.WishListModel ||
 	mongoose.model<WishListProps>("WishListModel", wishListSchema);
