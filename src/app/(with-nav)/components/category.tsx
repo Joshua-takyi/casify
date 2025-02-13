@@ -67,7 +67,7 @@ const Category = () => {
     const visibleItems = (!isMobile || showAll) ? categoryData : categoryData.slice(0, 2);
 
     return (
-        <div className="@container w-full py-8 md:py-16 font-family-apercu-pro bg-white">
+        <div className="@container w-full py-8 md:py-16  bg-white">
             <div className="max-w-[1280px] mx-auto px-4 py-2">
                 {/* Categories Grid */}
                 <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 text-gray-900">

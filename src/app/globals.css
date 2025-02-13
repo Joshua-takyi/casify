@@ -4,13 +4,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@font-face {
-	font-family: "Apercu Pro";
-	src: url("../fonts/apercu-pro-regular.woff2") format("woff2");
-	font-weight: normal;
-	font-style: normal;
-	font-display: swap;
-}
+/*@font-face {*/
+/*	font-family: "apercuMono";*/
+/*	src: url("../fonts/apercu-mono-pro-regular.woff2") format("woff2");*/
+/*	font-weight: normal;*/
+/*	font-style: normal;*/
+/*	font-display: swap;*/
+/*}*/
 
 
 @theme {
@@ -51,7 +51,7 @@
 	--color-chart-3: hsl(var(--chart-3));
 	--color-chart-4: hsl(var(--chart-4));
 	--color-chart-5: hsl(var(--chart-5));
-	--font-family-apercu-pro: "Apercu Pro", sans-serif;
+	/*--font-family-apercu-pro: "apercuMono", sans-serif;*/
 
 }
 

@@ -17,26 +17,29 @@ export const BuildQuery = (
 
 	// Helper function to add array conditions
 	const addArrayCondition = (key: string, value: string | null) => {
-		if (!value) return; // Early return
-
+		if (!value) return;
 		const array = value.split(",").map((item) => item.trim());
-		if (array.length === 0) return; // Early return
-
+		if (array.length === 0) return;
 		query[key] = { $in: array };
 	};
 
 	// General search across multiple fields using the "type" parameter
 	const search = searchParams.get("type");
 	if (search) {
-		const searchTerm = search.trim(); // Trim once
+		const searchTerm = search.trim();
 		if (searchTerm) {
-			const regex = new RegExp(`\\b${searchTerm}\\b`, "i"); // Create regex once
+			// Split search term into words, then allow an optional "s" after each word,
+			// and allow any number of spaces or hyphens between words.
+			const flexibleTerm = searchTerm
+				.split(/\s+/)
+				.map(word => word + "s?") // allow for optional plural 's'
+				.join("[-\\s]*");
+			const regex = new RegExp(flexibleTerm, "i");
 
 			query.$or = [
 				{ title: { $regex: regex } },
-				{ category: { $regex: regex } },
-				{ tags: { $in: [regex] } },
 				{ description: { $regex: regex } },
+				{ tags: { $in: [regex] } },
 				{ models: { $in: [regex] } },
 			];
 		}

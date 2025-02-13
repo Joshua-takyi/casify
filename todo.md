@@ -27,22 +27,22 @@ This file outlines the tasks required to build a robust, scalable e-commerce pla
 **II. Backend Development (Next.js API Routes):**
 
 - [ ] **Product API:**
-  - [ ] Create API route for creating a new product (POST).
-  - [ ] Create API route for retrieving all products (GET).
-  - [ ] Create API route for retrieving a single product by ID (GET).
-  - [ ] Create API route for updating a product (PUT).
-  - [ ] Create API route for deleting a product (DELETE).
+  - [ x] Create API route for creating a new product (POST).
+  - [ x] Create API route for retrieving all products (GET).
+  - [x ] Create API route for retrieving a single product by ID (GET).
+  - [x ] Create API route for updating a product (PUT).
+  - [x ] Create API route for deleting a product (DELETE).
 - [ ] **Category API:**
-  - [ ] Create API routes for managing product categories (CRUD).
+  - [x ] Create API routes for managing product categories (CRUD).
 - [ ] **Order API:**
-  - [ ] Create API route for creating a new order (POST).
-  - [ ] Create API route for retrieving all orders (GET - Admin).
+  - [ x] Create API route for creating a new order (POST).
+  - [x ] Create API route for retrieving all orders (GET - Admin).
   - [ ] Create API route for retrieving a single order by ID (GET).
-  - [ ] Create API route for updating order status (PUT - Admin).
+  - [ x] Create API route for updating order status (PUT - Admin).
 - [ ] **User API:**
-  - [ ] Create API route for user registration (POST).
-  - [ ] Create API route for user login (POST).
-  - [ ] Create API route for retrieving user profile (GET).
+  - [ x] Create API route for user registration (POST).
+  - [x ] Create API route for user login (POST).
+  - [ x] Create API route for retrieving user profile (GET).
   - [ ] Create API route for updating user profile (PUT).
 - [ ] **Payment API:**
   - [ ] Create API route for initiating a Paystack transaction.
@@ -73,14 +73,14 @@ This file outlines the tasks required to build a robust, scalable e-commerce pla
   - [ ] Implement loader components.
   - [ ] Implement success and error message components.
 - [ ] **Pages:**
-  - [ ] Create home page (product listing).
-  - [ ] Create product details page.
+  - [x ] Create home page (product listing).
+  - [ x] Create product details page.
   - [ ] Create shopping cart page.
   - [ ] Create checkout page.
   - [ ] Create order confirmation page.
   - [ ] Create user profile page.
-  - [ ] Create login page.
-  - [ ] Create registration page.
+  - [ x] Create login page.
+  - [ x] Create registration page.
 - [ ] **State Management (Zustand):**
   - [ ] Implement Zustand store for shopping cart state (add, remove, update items).
   - [ ] Implement Zustand store for user authentication state.

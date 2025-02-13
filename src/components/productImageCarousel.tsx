@@ -60,7 +60,7 @@ export const ImageCarousel = ({ images = [], alt = "" }) => {
     return (
         <div className="flex flex-col items-center w-full h-full space-y-4 ">
             {/* Main Image Container */}
-            <div className="relative w-full h-[330px] md:h-[430px] lg:h-[530px]  overflow-hidden group bg-white">
+            <div className="relative w-full h-[330px] md:h-[430px] lg:h-[530px]  overflow-hidden group ">
                 <AnimatePresence initial={false} custom={direction}>
                     <motion.div
                         key={activeIndex}

@@ -121,14 +121,16 @@ export const FormSelect = ({
 			<Select
 				onValueChange={(selectedValue) => {
 					if (isMulti) {
+						// For multi-select, add the selected value to the array
 						if (Array.isArray(value) && !value.includes(selectedValue)) {
 							onChange([...value, selectedValue]);
 						}
 					} else {
-						onChange(selectedValue);
+						// For single-select, return an array with the selected value
+						onChange([selectedValue]);
 					}
 				}}
-				value={isMulti ? "" : value || ""}
+				value={isMulti ? "" : value?.[0] || ""} // Use the first item for single-select
 			>
 				<SelectTrigger className={className}>
 					<SelectValue
@@ -137,9 +139,7 @@ export const FormSelect = ({
 								? Array.isArray(value) && value.length > 0
 									? `${value.length} selected`
 									: placeholder
-								: value
-								? findLabel(value)
-								: placeholder
+								: value?.[0] || placeholder
 						}
 					/>
 				</SelectTrigger>

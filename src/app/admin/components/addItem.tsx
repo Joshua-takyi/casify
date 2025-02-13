@@ -15,16 +15,9 @@ import { FormDateTimeInput } from "@/components/timeSelect";
 import { FormColors } from "@/components/colorSelect";
 import { FormDynamicList } from "@/components/dynamicList";
 import { FormImageUpload } from "@/components/imageUpload";
-import { ProductPropsForDb } from "@/types/products";
 import { FormInput } from "@/components/formInput";
 import axios from "axios";
 
-// Custom error types
-type ApiError = {
-	code?: number;
-	message: string;
-	details?: string;
-};
 
 const productSchema = z
 	.object({
@@ -118,7 +111,7 @@ export default function ProductForm() {
 	const [data, setData] = useState<ProductFormData>(initialValues);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
-	const { mutate, error } = useMutation({
+	const { mutate } = useMutation({
 		mutationKey: ["data", data],
 		mutationFn: async () => {
 			try {
@@ -139,7 +132,7 @@ export default function ProductForm() {
 			toast.success("Successfully uploaded product");
 			setData(initialValues); // Reset the form on success
 		},
-		onError: (error: any) => {
+		onError: (error) => {
 			// Check if the error is an instance of Error and has a message property
 			if (error instanceof Error) {
 				toast.error(`Error adding product: ${error.message}`);

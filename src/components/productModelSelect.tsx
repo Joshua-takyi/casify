@@ -19,7 +19,6 @@ export default function SelectPhoneModel({
                                              itemModel = [],
                                              value,
                                              onChange,
-                                             title = "Select Model",
                                          }: ModelSelectProps) {
     // Sorting logic
     const sortedModels = React.useMemo(() => {

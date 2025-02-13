@@ -1,9 +1,13 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { Search, X, History, TrendingUp } from "lucide-react";
+import {
+    MagnifyingGlassIcon,
+    XMarkIcon,
+    ClockIcon,
+    ChartBarIcon,
+} from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 interface SearchItem {
     query: string;
@@ -11,11 +15,11 @@ interface SearchItem {
 }
 
 const popularCategories = [
-    "Phone Cases",
-    "Airpod Cases",
+    "Phone Case",
+    "Airpod Case",
     "Chargers",
     "Headphones",
-    "Watch Protection"
+    "Watch Protection",
 ];
 
 export default function SearchComponent() {
@@ -37,18 +41,26 @@ export default function SearchComponent() {
     const handleSearch = (query: string) => {
         if (!query.trim()) return;
 
-        // Save to recent searches
-        const newSearch = { query: query.trim(), timestamp: Date.now() };
+        // Use the query as typed without forcing lower case.
+        const normalizedQuery = query.trim();
+        // Save to recent searches, ensuring no duplicate entries.
+        const newSearch = { query: normalizedQuery, timestamp: Date.now() };
         const updatedSearches = [
             newSearch,
-            ...recentSearches.filter(item => item.query !== query)
-        ].slice(0, 5); // Keep only last 5 searches
+            ...recentSearches.filter((item) => item.query !== normalizedQuery),
+        ].slice(0, 5);
 
         setRecentSearches(updatedSearches);
         sessionStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
 
         setIsOpen(false);
-        router.push(`/search?type=${encodeURIComponent(query)}&available=true&sortBy=price&order=asc&page=1`);
+        // Push the raw search query. The server’s BuildQuery function should
+        // transform it into a flexible regex (e.g. handling spaces vs. hyphens, etc.)
+        router.push(
+            `/search?type=${encodeURIComponent(
+                normalizedQuery
+            )}&available=true&sortBy=price&sortOrder=asc&page=1`
+        );
     };
 
     useEffect(() => {
@@ -66,7 +78,7 @@ export default function SearchComponent() {
                 onClick={() => setIsOpen(true)}
                 aria-expanded={isOpen}
                 aria-label="Toggle search"
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                className="p-2 hover:bg-[#f4f4f4] rounded-full transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#e4e4e4]"
             >
                 <MagnifyingGlassIcon className="w-5 h-5 text-gray-700" />
             </button>
@@ -97,35 +109,33 @@ export default function SearchComponent() {
                                         </h2>
                                         <button
                                             onClick={() => setIsOpen(false)}
-                                            className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-150"
+                                            className="p-2 hover:bg-[#f4f4f4] rounded-full transition-colors duration-150"
                                         >
-                                            <X className="w-5 h-5 text-gray-600" />
+                                            <XMarkIcon className="w-5 h-5 text-gray-600" />
                                         </button>
                                     </div>
 
-                                    <form onSubmit={(e) => {
-                                        e.preventDefault();
-                                        handleSearch(searchQuery);
-                                    }}>
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            handleSearch(searchQuery);
+                                        }}
+                                    >
                                         <div className="flex gap-3 items-center">
                                             <div className="relative flex-1">
-                                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                                 <input
                                                     ref={inputRef}
                                                     type="search"
                                                     value={searchQuery}
                                                     onChange={(e) => setSearchQuery(e.target.value)}
                                                     placeholder="Type to search..."
-                                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg
-                                                             focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent
-                                                             transition-all duration-150"
+                                                    className="w-full pl-12 pr-4 py-3 bg-[#f4f4f4] border border-[#e4e4e4] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e4e4e4] focus:border-transparent transition-all duration-150"
                                                 />
                                             </div>
                                             <button
                                                 type="submit"
-                                                className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg
-                                                         transition-colors duration-150 font-medium disabled:opacity-50
-                                                         disabled:cursor-not-allowed"
+                                                className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-lg transition-colors duration-150 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                                 disabled={!searchQuery.trim()}
                                             >
                                                 Search
@@ -136,7 +146,7 @@ export default function SearchComponent() {
                                             {recentSearches.length > 0 && (
                                                 <div className="space-y-3">
                                                     <h3 className="text-sm font-medium text-gray-500 flex items-center gap-2">
-                                                        <History className="w-4 h-4" />
+                                                        <ClockIcon className="w-4 h-4" />
                                                         Recent Searches
                                                     </h3>
                                                     <div className="flex gap-2 flex-wrap">
@@ -145,9 +155,7 @@ export default function SearchComponent() {
                                                                 key={query}
                                                                 type="button"
                                                                 onClick={() => handleSearch(query)}
-                                                                className="px-4 py-2 bg-gray-100 hover:bg-gray-200
-                                                                         rounded-lg text-sm text-gray-700
-                                                                         transition-colors duration-150"
+                                                                className="px-4 py-2 bg-[#f4f4f4] hover:bg-[#e4e4e4] rounded-lg text-sm text-gray-700 transition-colors duration-150"
                                                             >
                                                                 {query}
                                                             </button>
@@ -158,7 +166,7 @@ export default function SearchComponent() {
 
                                             <div className="space-y-3">
                                                 <h3 className="text-sm font-medium text-gray-500 flex items-center gap-2">
-                                                    <TrendingUp className="w-4 h-4" />
+                                                    <ChartBarIcon className="w-4 h-4" />
                                                     Popular Categories
                                                 </h3>
                                                 <div className="flex gap-2 flex-wrap">
@@ -167,9 +175,7 @@ export default function SearchComponent() {
                                                             key={category}
                                                             type="button"
                                                             onClick={() => handleSearch(category)}
-                                                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200
-                                                                     rounded-lg text-sm text-gray-700
-                                                                     transition-colors duration-150"
+                                                            className="px-4 py-2 bg-[#f4f4f4] hover:bg-[#e4e4e4] rounded-lg text-sm text-gray-700 transition-colors duration-150"
                                                         >
                                                             {category}
                                                         </button>

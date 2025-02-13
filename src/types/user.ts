@@ -11,3 +11,18 @@ export interface SignInProps {
 	email: string;
 	password: string;
 }
+
+
+export interface ShippingProps {
+	userId: mongoose.Schema.Types.ObjectId;
+	userInfo: {
+		firstName: string;
+		lastName: string;
+		phone: string;
+		email: string;
+		city: string;
+		region: string;
+		streetAddress: string; // Use the more common name
+		ghanaPost:string
+	}
+}

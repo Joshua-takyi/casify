@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import mongoose, { Document } from "mongoose";
 
 export interface ProductProps extends Document {
 	title: string;
@@ -48,13 +48,21 @@ export interface ProductPropsForDb {
 	colors: string[];
 }
 
-export interface  ProductCardProps {
-	title?:string;
-	discount?:number;
-	path?:string;
-	tags?:string[];
-	price?:number;
-	images?:string[];
-	image:string
-	colors?:string[];
+export interface ProductCardProps {
+	title?: string;
+	discount?: number;
+	path?: string;
+	tags?: string[];
+	price?: number;
+	images?: string[];
+	image: string;
+	colors?: string[];
+}
+
+export interface WishListProps extends Document {
+	userId: mongoose.Schema.Types.ObjectId;
+	products: {
+		productId: mongoose.Schema.Types.ObjectId;
+		slug: string;
+	}[];
 }

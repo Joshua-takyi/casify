@@ -1,4 +1,5 @@
 import React from 'react';
+import { Check } from 'lucide-react';
 
 interface ProductColorSelectorProps {
     product: {
@@ -10,58 +11,58 @@ interface ProductColorSelectorProps {
 
 const ProductColorSelector = ({ product, selectedColor, setSelectedColor }: ProductColorSelectorProps) => {
     return (
-        <div className="px-4 py-2 ">
-            <div className="space-y-3">
-                {/* Color Buttons */}
-                <div className="flex flex-wrap  justify-evenly items-center gap-2 ">
-                    {product.colors.map((color) => {
-                        const colorName = color.charAt(0).toUpperCase() + color.slice(1); // Capitalize color name
+        <div className="w-full max-w-md">
+            <div className="flex flex-wrap items-center gap-3">
+                {product.colors.map((color) => {
+                    const colorName = color.charAt(0).toUpperCase() + color.slice(1);
+                    const isWhite = color.toLowerCase() === 'white';
+                    const isSelected = selectedColor === color;
 
-                        return (
+                    return (
+                        <div key={color} className="relative group">
                             <button
-                                key={color}
                                 onClick={() => setSelectedColor(color)}
                                 className={`
-                                    relative w-6 h-6 rounded-full border border-gray-300 transition-all duration-200
-                                    focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
-                                    ${selectedColor === color
+                                    relative w-8 h-8 rounded-full 
+                                    transition-all duration-200 ease-in-out
+                                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                                    hover:scale-110
+                                    ${isSelected
                                     ? 'ring-2 ring-gray-900 ring-offset-2 scale-110'
-                                    : 'hover:scale-105 hover:shadow-sm'
+                                    : 'ring-1 ring-gray-200'
                                 }
                                 `}
                                 style={{
                                     backgroundColor: color,
-                                    backgroundImage: color.toLowerCase() === 'white'
-                                        ? 'linear-gradient(45deg, #e0e0e0 25%, transparent 25%, transparent 75%, #e0e0e0 75%, #e0e0e0), linear-gradient(45deg, #e0e0e0 25%, transparent 25%, transparent 75%, #e0e0e0 75%, #e0e0e0)'
+                                    backgroundImage: isWhite
+                                        ? 'linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0), linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0)'
                                         : 'none',
-                                    backgroundSize: color.toLowerCase() === 'white' ? '10px 10px' : 'auto',
-                                    backgroundPosition: color.toLowerCase() === 'white' ? '0 0, 5px 5px' : 'auto'
+                                    backgroundSize: isWhite ? '8px 8px' : 'auto',
+                                    backgroundPosition: isWhite ? '0 0, 4px 4px' : 'auto'
                                 }}
                                 aria-label={`Select ${colorName} color`}
-                                aria-pressed={selectedColor === color}
+                                aria-pressed={isSelected}
                                 title={colorName}
                             >
-                                {/* Check mark for selected color */}
-                                {selectedColor === color && (
-                                    <svg
-                                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-white drop-shadow-md"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={3}
-                                            d="M5 13l4 4L19 7"
-                                        />
-                                    </svg>
+                                {isSelected && (
+                                    <Check
+                                        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4
+                                            ${isWhite || color.toLowerCase() === 'yellow'
+                                            ? 'text-gray-700'
+                                            : 'text-white'
+                                        } drop-shadow-sm`}
+                                        strokeWidth={3}
+                                    />
                                 )}
                             </button>
-                        );
-                    })}
-                </div>
+
+                            {/* Color name tooltip */}
+                            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+                                {colorName}
+                            </span>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

@@ -1,7 +1,7 @@
 "use server";
 
 import { signIn } from "@/auth";
-import {ProductCardProps, ProductPropsForDb} from "@/types/products";
+import { ProductPropsForDb } from "@/types/products";
 import { SignInProps } from "@/types/user";
 import axios, { AxiosError } from "axios";
 
@@ -139,6 +139,7 @@ export async function SignInAction(data: SignInProps) {
 		};
 	}
 }
+
 export interface ApiResponse {
 	success: boolean;
 	data?: ProductPropsForDb;
@@ -219,16 +220,21 @@ export async function AddProduct(
 	}
 }
 
-
 interface CatchAllSlugProps {
 	slug: string;
 	color?: string;
 	model?: string;
 }
 
-export async function CatchAllSlug({ slug = "", color = "", model = "" }: CatchAllSlugProps) {
+export async function CatchAllSlug({
+	slug = "",
+	color = "",
+	model = "",
+}: CatchAllSlugProps) {
 	try {
-		const res = await axios.get(`${API_URL}/products/get-item/${slug}?color=${color}&model=${model}`);
+		const res = await axios.get(
+			`${API_URL}/products/get-item/${slug}?color=${color}&model=${model}`
+		);
 		if (res.status === 200) {
 			return {
 				success: true,
@@ -267,7 +273,6 @@ export async function CatchAllSlug({ slug = "", color = "", model = "" }: CatchA
 				message: errorMessage,
 				statusCode: statusCode,
 			};
-
 		} else {
 			// Handle non-Axios errors more generally
 			console.error("Non-Axios error:", error);
@@ -278,11 +283,17 @@ export async function CatchAllSlug({ slug = "", color = "", model = "" }: CatchA
 			};
 		}
 	}
-
-	// Code should not reach here, but let's provide a default return for type safety
-	return {
-		success: false,
-		message: "An unknown error occurred",
-		statusCode: 500,
-	};
 }
+
+// interface  CartProps {
+// 	productId: string;
+// 	color: string;
+// 	quantity: number;
+// 	model: string;
+// }
+
+// export async function AddToCart( {productId, quantity,color,model }:CartProps){
+// 	try {
+// 		const res= await axios.post(`${API_URL}/cart/get-cart`)
+// 	}
+// }
