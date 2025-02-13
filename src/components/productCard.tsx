@@ -125,9 +125,9 @@ const ProductCard = ({
 		e.stopPropagation();
 		setIsWishlist((prev) => !prev);
 		if (!isWishlist) {
-			addToWishlist(id);
+			addToWishlist(id as string);
 		} else {
-			removeFromWishlist(id);
+			removeFromWishlist(id as string);
 		}
 	};
 
@@ -218,6 +218,7 @@ const ProductCard = ({
 							{colorArray.map((color, index) => (
 								<div
 									key={index}
+									role="button"
 									onClick={(e) => handleColorClick(e, color)}
 									className="h-4 w-4 border border-gray-200 cursor-pointer hover:border-black transition-colors duration-200"
 									style={{ backgroundColor: color }}
