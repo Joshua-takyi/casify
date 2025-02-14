@@ -1,155 +1,120 @@
 "use client";
-import {
-	motion,
-	useScroll,
-	useTransform,
-	useSpring,
-	useAnimate,
-	stagger,
-} from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import Wrapper from "@/components/wrapper";
 import Link from "next/link";
-
-const genderSelect = [
-	{
-		id: 1,
-		name: "shop masculine",
-		path: "/male-preference",
-		bgColor: "rgb(30, 30, 30)",
-	},
-	{
-		id: 2,
-		name: "shop feminine",
-		path: "/female-preference",
-		bgColor: "rgb(40, 40, 40)",
-	},
-];
-
-const MotionLink = motion(Link);
+import Head from "next/head";
+import Wrapper from "@/components/wrapper";
+import { ArrowRight, Shield, Sparkles, Truck } from "lucide-react";
 
 export default function HeroSection() {
-	const [scope, animate] = useAnimate();
-	const containerRef = useRef(null);
-	const [isLoaded, setIsLoaded] = useState(false);
-
-	// Parallax scroll effect
-	const { scrollY } = useScroll();
-	const y = useTransform(scrollY, [0, 1000], [0, 400]);
-	const opacity = useTransform(scrollY, [0, 300], [1, 0]);
-
-	// Smooth spring animation for parallax
-	const smoothY = useSpring(y, {
-		stiffness: 100,
-		damping: 30,
-		mass: 0.5,
-	});
-
-	// Text reveal animation sequence
-	useEffect(() => {
-		if (!isLoaded) {
-			const sequence = async () => {
-				animate(
-					scope.current,
-					{ opacity: 1, y: 0 },
-					{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }
-				);
-				animate(
-					".hero-text",
-					{ opacity: 1, x: 0 },
-					{ duration: 0.6, delay: stagger(0.2) }
-				);
-
-				animate(
-					".cta-button",
-					{ opacity: 1, scale: 1 },
-					{ type: "spring", stiffness: 200, damping: 20 }
-				);
-			};
-
-			sequence();
-			setIsLoaded(true);
-		}
-	}, [animate, isLoaded, scope]);
-
-	// Background parallax effect
-	const bgY = useTransform(scrollY, [0, 1000], ["0%", "50%"]);
-	const bgScale = useTransform(scrollY, [0, 1000], [1, 1.2]);
+	// Simplified hero content
+	const heroContent = {
+		announcement: "Free Shipping in Ghana & West Africa!",
+		tagline: "Made in Ghana",
+		headline: "Protect Your Phone",
+		description:
+			"Durable, stylish cases for everyday use. Fast delivery and lifetime warranty.",
+		ctaText: "Shop Now",
+		ctaLink: "/collection?category=phone-cases&available=true&limit=20",
+		stats: [
+			{ value: "24h", label: "Fast Delivery", icon: Truck },
+			{ value: "4.9/5", label: "Reviews", icon: Sparkles },
+			{ value: "5Y", label: "Warranty", icon: Shield },
+		],
+		achievements: "Award-winning. Trusted across Africa.",
+	};
 
 	return (
-		<section ref={containerRef} className="relative h-dvh overflow-hidden">
-			{/* Animated background */}
-			<motion.div
-				style={{
-					y: bgY,
-					scale: bgScale,
-					backgroundImage:
-						"url(/images/jascent-leung--uF6u5Cmnsw-unsplash.jpg)",
-				}}
-				className="absolute inset-0 bg-no-repeat bg-cover bg-center"
-			/>
+		<>
+			<Head>
+				<title>Casify Ghana | Premium Phone Cases & Accessories</title>
+				<meta
+					name="description"
+					content="Premium phone cases made in Ghana. Stylish protection with fast delivery."
+				/>
+				<meta property="og:title" content="Casify Ghana - Phone Cases" />
+				<meta property="og:image" content="/images/casify-ghana-preview.jpg" />
+				<meta
+					name="keywords"
+					content="phone cases ghana, premium phone cases, phone protection, africa phone cases"
+				/>
+				<link rel="canonical" href="https://casify.com.gh" />
+			</Head>
 
-			{/* Overlay gradient */}
-			<motion.div
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 0.4 }}
-				transition={{ duration: 1.5 }}
-				className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60"
-			/>
+			<section
+				className="relative h-dvh bg-slate-900"
+				aria-label="Premium Phone Protection"
+			>
+				{/* Background layers */}
+				<div
+					className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40"
+					style={{
+						backgroundImage:
+							"url(/images/jascent-leung-CubSQS4iYEE-unsplash.jpg)",
+					}}
+					role="presentation"
+				/>
+				{/* <div className="absolute inset-0 bg-gradient-to-b from-slate-900/90 via-slate-900/80 to-slate-900/95" /> */}
 
-			<Wrapper className="relative h-full">
-				<motion.div
-					ref={scope}
-					style={{ y: smoothY, opacity }}
-					initial={{ opacity: 0, y: 100 }}
-					className="flex flex-col h-full justify-end"
-				>
-					<div className="flex flex-col capitalize text-white space-y-6 pb-20 md:pb-32">
-						{/* Animated text elements */}
-						<motion.span
-							className="hero-text text-xl md:text-2xl tracking-wide"
-							initial={{ opacity: 0, x: -20 }}
-						>
-							sale of the season
-						</motion.span>
+				<Wrapper className="relative h-full">
+					<div className="h-full flex items-center">
+						<div className="max-w-4xl space-y-8 pt-10">
+							{/* Announcement banner */}
+							<span className="inline-block bg-slate-800/80 backdrop-blur-sm text-white px-6 py-3 rounded-full text-sm md:text-base">
+								{heroContent.announcement}
+							</span>
 
-						<motion.h1
-							className="hero-text font-family-apercu-pro text-4xl md:text-6xl lg:text-7xl font-bold"
-							initial={{ opacity: 0, x: -20 }}
-						>
-							up to 40% off
-						</motion.h1>
+							<div className="space-y-6">
+								{/* Tagline */}
+								<span className="block text-slate-300 text-lg md:text-xl font-medium">
+									{heroContent.tagline}
+								</span>
 
-						{/* Animated CTA buttons */}
-						<motion.section
-							className="flex flex-col md:flex-row gap-4 items-start md:items-center mt-8"
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ delay: 0.5 }}
-						>
-							{genderSelect.map((gender) => (
-								<MotionLink
-									href={gender.path}
-									key={gender.id}
-									className="cta-button px-8 py-4 rounded-lg text-lg md:text-xl border border-white/20 backdrop-blur-sm"
-									initial={{ opacity: 0, scale: 0.9 }}
-									whileHover={{
-										backgroundColor: gender.bgColor,
-										scale: 1.05,
-										transition: {
-											duration: 0.2,
-											ease: "easeOut",
-										},
-									}}
-									whileTap={{ scale: 0.98 }}
+								{/* Headline */}
+								<h1 className="text-[1.5rem] md:text-[3rem] font-bold leading-tight text-white">
+									{heroContent.headline}
+								</h1>
+
+								{/* Description */}
+								<p className="text-base md:text-lg text-slate-300 leading-relaxed max-w-2xl">
+									{heroContent.description}
+								</p>
+							</div>
+
+							{/* CTA and Stats Section */}
+							<div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+								<Link
+									href={heroContent.ctaLink}
+									className="group inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-8 py-4 rounded-lg text-lg font-medium transition-all duration-200 hover:transform hover:-translate-y-0.5"
 								>
-									{gender.name}
-								</MotionLink>
-							))}
-						</motion.section>
+									{heroContent.ctaText}
+									<ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+								</Link>
+
+								{/* Stats */}
+								<div className="flex flex-wrap gap-6 text-sm text-slate-300">
+									{heroContent.stats.map((stat, index) => (
+										<div key={index} className="flex items-center gap-2">
+											<stat.icon className="h-5 w-5 text-slate-400" />
+											<span>
+												<span className="block text-white font-medium">
+													{stat.value}
+												</span>
+												<span className="text-slate-400">{stat.label}</span>
+											</span>
+										</div>
+									))}
+								</div>
+							</div>
+
+							{/* Achievements */}
+							<div className="border-t border-slate-700/50 pt-6">
+								<p className="text-slate-400 text-sm">
+									{heroContent.achievements}
+								</p>
+							</div>
+						</div>
 					</div>
-				</motion.div>
-			</Wrapper>
-		</section>
+				</Wrapper>
+			</section>
+		</>
 	);
 }

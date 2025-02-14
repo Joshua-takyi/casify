@@ -12,7 +12,6 @@ import axios, { AxiosError } from "axios";
 // -----------------------
 // Helper Functions
 // -----------------------
-
 const formatPrice = (price: number, currency = "GHS"): string => {
 	return new Intl.NumberFormat("en-GH", {
 		style: "currency",
@@ -81,12 +80,10 @@ const ProductCard = ({
 				});
 				return response.data.data;
 			} catch (error) {
-				// Handle error appropriately
 				console.error("Error fetching wishlist:", error);
 				throw error;
 			}
 		},
-		// Add error handling and retry options
 		retry: 2,
 		retryDelay: 1000,
 	});
@@ -111,7 +108,6 @@ const ProductCard = ({
 					{ productId },
 					{ withCredentials: true }
 				);
-
 				if (res.status === 201) {
 					return res.data;
 				}
@@ -147,7 +143,6 @@ const ProductCard = ({
 					withCredentials: true,
 					data: { productId },
 				});
-
 				if (res.status === 200) {
 					return res.data;
 				}
@@ -206,7 +201,7 @@ const ProductCard = ({
 
 	if (wishlistLoading) {
 		return (
-			<div className="w-full border border-gray-200 bg-white p-4">
+			<div className="w-full border border-gray-200 bg-white p-4 rounded-sm">
 				<div className="animate-pulse">
 					<div className="aspect-square w-full bg-gray-200" />
 					<div className="mt-4 h-4 w-2/3 bg-gray-200" />
@@ -224,7 +219,7 @@ const ProductCard = ({
 	return (
 		<Link
 			href={`/product/${slug}`}
-			className="group relative block w-full border border-gray-200 bg-white"
+			className="group relative block w-full border border-gray-200 bg-white rounded-md overflow-hidden"
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>

@@ -58,11 +58,11 @@ This file outlines the tasks required to build a robust, scalable e-commerce pla
 **III. Frontend Development (React/Next.js Components):**
 
 - [ ] **UI Components:**
-  - [ ] Create reusable button component (Shadcn/Radix UI or custom).
-  - [ ] Create reusable input component (Shadcn/Radix UI or custom).
-  - [ ] Create product card component.
-  - [ ] Create product listing component (with pagination).
-  - [ ] Create product details component.
+  - [ x] Create reusable button component (Shadcn/Radix UI or custom).
+  - [x ] Create reusable input component (Shadcn/Radix UI or custom).
+  - [x] Create product card component.
+  - [ x] Create product listing component (with pagination).
+  - [x ] Create product details component.
   - [ ] Create shopping cart component.
   - [ ] Create checkout form component.
   - [ ] Create address form component (Ghana-specific).
