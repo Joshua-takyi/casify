@@ -9,6 +9,7 @@ import Loading from "@/app/loading";
 import Wrapper from "@/components/wrapper";
 import { Product } from "@/app/(with-nav)/components/collectionPage";
 import ProductCard from "@/components/productCard";
+import NoResultsFound from "./emptySearch";
 
 // Define our primary color
 // const PRIMARY_COLOR = "#868b92";
@@ -149,22 +150,9 @@ export default function SearchCom() {
 							))}
 						</div>
 					) : (
-						<div className="flex flex-col items-center justify-center py-16">
-							<div className="text-center">
-								<p className="text-xl text-[#868b92] mb-4">
-									No items found for &quot;{query}&quot;
-								</p>
-								<p className="text-[#868b92] mb-6">
-									Try checking your spelling or using different keywords.
-								</p>
-								<button
-									onClick={() => router.push("/")}
-									className="px-6 py-2 bg-[#868b92] text-white rounded-md cursor-pointer"
-								>
-									Browse All Products
-								</button>
-							</div>
-						</div>
+						<section>
+							<NoResultsFound onBrowseAll={handleSearch} query={query} />
+						</section>
 					)}
 				</section>
 			</Wrapper>

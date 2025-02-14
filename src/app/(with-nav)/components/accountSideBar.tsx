@@ -8,14 +8,15 @@ import {
 	Bars3Icon,
 	XMarkIcon,
 	ShoppingBagIcon,
-	MapPinIcon,
-	CreditCardIcon,
-	ShieldCheckIcon,
-	HeartIcon,
-	GiftIcon,
+	// MapPinIcon,
+	// CreditCardIcon,
+	// ShieldCheckIcon,
+	// HeartIcon,
+	// GiftIcon,
 	UserIcon,
-	ArrowLeftIcon,
+	// ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
+import SignOutBtn from "./signOutBtn";
 
 // Types
 interface NavLink {
@@ -42,36 +43,36 @@ const navLinks: NavLink[] = [
 		icon: ShoppingBagIcon,
 		description: "View and manage your orders",
 	},
-	{
-		name: "Addresses",
-		href: "/account/addresses",
-		icon: MapPinIcon,
-		description: "Manage your shipping addresses",
-	},
-	{
-		name: "Payments",
-		href: "/account/payments",
-		icon: CreditCardIcon,
-		description: "Manage payment methods",
-	},
-	{
-		name: "Security",
-		href: "/account/security",
-		icon: ShieldCheckIcon,
-		description: "Update security settings",
-	},
-	{
-		name: "Wishlist",
-		href: "/account/wishlist",
-		icon: HeartIcon,
-		description: "View saved items",
-	},
-	{
-		name: "Rewards",
-		href: "/account/rewards",
-		icon: GiftIcon,
-		description: "Check your rewards",
-	},
+	// {
+	// 	name: "Addresses",
+	// 	href: "/account/addresses",
+	// 	icon: MapPinIcon,
+	// 	description: "Manage your shipping addresses",
+	// },
+	// {
+	// 	name: "Payments",
+	// 	href: "/account/payments",
+	// 	icon: CreditCardIcon,
+	// 	description: "Manage payment methods",
+	// },
+	// {
+	// 	name: "Security",
+	// 	href: "/account/security",
+	// 	icon: ShieldCheckIcon,
+	// 	description: "Update security settings",
+	// },
+	// {
+	// 	name: "Wishlist",
+	// 	href: "/account/wishlist",
+	// 	icon: HeartIcon,
+	// 	description: "View saved items",
+	// },
+	// {
+	// 	name: "Rewards",
+	// 	href: "/account/rewards",
+	// 	icon: GiftIcon,
+	// 	description: "Check your rewards",
+	// },
 	{
 		name: "Account",
 		href: "/account/settings",
@@ -110,6 +111,8 @@ export default function AccountSidebar() {
 	const [isOpen, setIsOpen] = useState(false);
 	const pathname = usePathname();
 
+	// const router = useRouter();
+
 	useEffect(() => {
 		const handleResize = () => {
 			const mobile = window.innerWidth < MOBILE_BREAKPOINT;
@@ -126,15 +129,6 @@ export default function AccountSidebar() {
 		window.addEventListener("resize", handleResize);
 		return () => window.removeEventListener("resize", handleResize);
 	}, []);
-
-	const handleLogout = async () => {
-		try {
-			// Add your logout logic here
-			console.log("Logging out...");
-		} catch (error) {
-			console.error("Logout failed:", error);
-		}
-	};
 
 	return (
 		<>
@@ -215,17 +209,9 @@ export default function AccountSidebar() {
 						</nav>
 
 						{/* Footer */}
-						<div className="p-4 border-t">
-							<motion.button
-								className="flex items-center w-full p-3 rounded-lg text-red-600 hover:bg-red-50"
-								onClick={handleLogout}
-								whileHover={{ scale: 1.02 }}
-								whileTap={{ scale: 0.98 }}
-							>
-								<ArrowLeftIcon className="w-6 h-6" />
-								<span className="ml-3 text-sm font-medium">Logout</span>
-							</motion.button>
-						</div>
+						<section>
+							<SignOutBtn />
+						</section>
 					</motion.aside>
 				)}
 			</AnimatePresence>

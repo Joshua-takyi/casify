@@ -10,6 +10,10 @@ const userSchema: Schema<UserProps> = new mongoose.Schema(
 			type: String,
 			required: true,
 		},
+		avatar: {
+			type: String,
+			required: false,
+		},
 		email: {
 			type: String,
 			required: true,

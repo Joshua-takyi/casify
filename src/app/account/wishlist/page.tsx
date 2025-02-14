@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import ProductCard from "@/components/productCard";
+import Loading from "@/app/loading";
+import EmptyWishlist from "../components/emptyWishlist";
 
 // -----------------------
 // Interface
@@ -49,7 +50,11 @@ const WishList = () => {
 	}, [wishlistData]);
 
 	if (wishlistLoading) {
-		return <div className="py-8">Loading wishlist...</div>;
+		return (
+			<div className="py-8">
+				<Loading />
+			</div>
+		);
 	}
 
 	if (wishlistError) {
@@ -58,15 +63,9 @@ const WishList = () => {
 
 	if (!wishlistItems || wishlistItems.length === 0) {
 		return (
-			<div className="py-8 flex flex-col items-center justify-center">
-				<p className="text-gray-500 text-lg mb-4">Your wishlist is empty.</p>
-				<Link
-					href="/collections"
-					className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-				>
-					Continue Shopping
-				</Link>
-			</div>
+			<section>
+				<EmptyWishlist />
+			</section>
 		);
 	}
 
@@ -77,7 +76,7 @@ const WishList = () => {
 				{wishlistItems.map((item) => (
 					<div key={item._id}>
 						<ProductCard
-							id={item.productId._id}
+							// id={item.productId._id}
 							title={item.productId.title}
 							price={item.productId.price}
 							images={item.productId.images}

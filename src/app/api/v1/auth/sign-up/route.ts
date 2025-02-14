@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 const Schema = z.object({
 	name: z.string().min(5, { message: "Name must be at least 5 characters" }),
 	email: z.string().email({ message: "Invalid email address" }),
+	avatar: z.string().optional(),
 	password: z
 		.string()
 		.min(6, { message: "Password must be at least 6 characters" })
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
 		const body = await req.json();
 		const validatedBody = Schema.parse(body);
 
-		const { email, name, password } = validatedBody;
+		const { email, name, password, avatar } = validatedBody;
 
 		if (mongoose.connection.readyState !== 1) {
 			await ConnectDb();
@@ -54,6 +55,7 @@ export async function POST(req: Request) {
 		const newUser = await UserModel.create({
 			name,
 			email,
+			avatar,
 			password: hashedPassword,
 		});
 

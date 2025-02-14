@@ -1,7 +1,6 @@
 // app/api/verify-payment/route.ts
 import axios from "axios";
 import { NextResponse } from "next/server";
-
 export async function POST(req: Request) {
 	try {
 		const { reference } = await req.json();
@@ -27,7 +26,6 @@ export async function POST(req: Request) {
 				},
 			}
 		);
-
 		const data = response.data;
 
 		if (data.status === true && data.data.status === "success") {

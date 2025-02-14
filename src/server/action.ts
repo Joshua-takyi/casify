@@ -1,9 +1,11 @@
 "use server";
 
-import { signIn } from "@/auth";
+import { signIn, signOut } from "@/auth";
 import { ProductPropsForDb } from "@/types/products";
 import { SignInProps } from "@/types/user";
 import axios, { AxiosError } from "axios";
+import { redirect } from "next/navigation";
+// import { redirect } from "next/navigation";
 
 interface SignUpData {
 	name: string;
@@ -138,6 +140,11 @@ export async function SignInAction(data: SignInProps) {
 			error: errorMessage,
 		};
 	}
+}
+
+export async function handleSignOut() {
+	await signOut();
+	redirect("/");
 }
 
 export interface ApiResponse {
@@ -284,70 +291,3 @@ export async function CatchAllSlug({
 		}
 	}
 }
-
-// export async function AddToWishList(productId: string) {
-// 	try {
-// 		const res = await axios.post(`${API_URL}/wishlist/add-wishlist`, {
-// 			productId,
-// 		});
-// 		if (res.status === 201) {
-// 			return {
-// 				success: true,
-// 				message: "Product added to wishlist successfully",
-// 			};
-// 		}
-// 		throw new Error(`Unexpected status code: ${res.status}`);
-// 	} catch (error) {
-// 		if (axios.AxiosError) {
-// 			const axiosError = error as AxiosError<{ message?: string }>;
-// 			let errorMessage = "Failed to add product to wishlist";
-// 			if (axiosError.response?.data?.message) {
-// 				errorMessage = axiosError.response.data.message;
-// 			}
-// 			return {
-// 				success: false,
-// 				message: errorMessage,
-// 			};
-// 		}
-// 		const errorMessage = "Failed to add product to wishlist";
-// 		return {
-// 			success: false,
-// 			message: errorMessage,
-// 		};
-// 	}
-// }
-
-// export async function RemoveFromWishlist(productId: string) {
-// 	try {
-// 		const res = await axios.delete(`${API_URL}/wishlist/remove-wishlist`, {
-// 			data: { productId },
-// 		});
-// 		if (res.status !== 200) {
-// 			return {
-// 				success: false,
-// 				message: "Failed to remove product from wishlist",
-// 			};
-// 		}
-// 		return {
-// 			success: true,
-// 			message: "Product removed from wishlist successfully",
-// 		};
-// 	} catch (error) {
-// 		if (axios.AxiosError) {
-// 			const axiosError = error as AxiosError<{ message?: string }>;
-// 			let errorMessage = "Failed to remove product from wishlist";
-// 			if (axiosError.response?.data?.message) {
-// 				errorMessage = axiosError.response.data.message;
-// 			}
-// 			return {
-// 				success: false,
-// 				message: errorMessage,
-// 			};
-// 		}
-// 		const errorMessage = "Failed to remove product from wishlist";
-// 		return {
-// 			success: false,
-// 			message: errorMessage,
-// 		};
-// 	}
-// }

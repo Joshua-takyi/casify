@@ -142,7 +142,6 @@ export default function CollectionPage() {
 					{products.map((product) => (
 						<div key={product._id}>
 							<ProductCard
-								id={product._id}
 								title={product.title}
 								price={product.price}
 								images={product.images}
