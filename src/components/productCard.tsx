@@ -9,9 +9,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import axios, { AxiosError } from "axios";
 
-// -----------------------
-// Helper Functions
-// -----------------------
+// Helper Functions remain the same
 const formatPrice = (price: number, currency = "GHS"): string => {
 	return new Intl.NumberFormat("en-GH", {
 		style: "currency",
@@ -23,9 +21,7 @@ const formatName = (title: string): string => {
 	return title.length > 20 ? `${title.slice(0, 20)}...` : title;
 };
 
-// -----------------------
-// Props Interface
-// -----------------------
+// Props Interface remains the same
 export interface ProductCardProps {
 	id?: string;
 	title: string;
@@ -37,9 +33,7 @@ export interface ProductCardProps {
 	isNew?: boolean;
 }
 
-// -----------------------
-// ProductCard Component
-// -----------------------
+// Updated ProductCard Component
 const ProductCard = ({
 	id,
 	title,
@@ -50,23 +44,18 @@ const ProductCard = ({
 	model = "",
 	isNew = false,
 }: ProductCardProps) => {
-	// State for hover effect
 	const [isHovered, setIsHovered] = useState(false);
-
-	// Convert images and colors to arrays for consistent handling
 	const imageArray = Array.isArray(images) ? images : [images];
 	const colorArray = Array.isArray(colors) ? colors : colors ? [colors] : [];
-
 	const router = useRouter();
 	const queryClient = useQueryClient();
-
 	const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 	useEffect(() => {
 		axios.defaults.withCredentials = true;
 	}, []);
 
-	// Fetch wishlist data
+	// Updated wishlist query with better error handling
 	const {
 		data: wishlistData,
 		isLoading: wishlistLoading,
@@ -78,9 +67,13 @@ const ProductCard = ({
 				const response = await axios.get(`${API_URL}/wishlist/get-wishlist`, {
 					withCredentials: true,
 				});
-				return response.data.data;
+				// Return empty array if no data is found
+				return response.data.data || [];
 			} catch (error) {
-				console.error("Error fetching wishlist:", error);
+				if (axios.isAxiosError(error) && error.response?.status === 404) {
+					// Return empty array for 404 (no wishlist found)
+					return [];
+				}
 				throw error;
 			}
 		},
@@ -94,11 +87,12 @@ const ProductCard = ({
 		};
 	}
 
-	const isInWishlist: boolean =
-		wishlistData?.some((item: WishlistItem) => item.productId._id === id) ??
-		false;
+	// Updated isInWishlist check with null safety
+	const isInWishlist: boolean = Array.isArray(wishlistData)
+		? wishlistData.some((item: WishlistItem) => item.productId._id === id)
+		: false;
 
-	// Wishlist mutations
+	// Wishlist mutations remain the same
 	const { mutate: addToWishlist } = useMutation({
 		mutationKey: ["wishlist"],
 		mutationFn: async (productId: string) => {
@@ -199,6 +193,7 @@ const ProductCard = ({
 		router.push(getColorLink(color));
 	};
 
+	// Updated loading state to handle empty wishlist gracefully
 	if (wishlistLoading) {
 		return (
 			<div className="w-full border border-gray-200 bg-white p-4 rounded-sm">
@@ -211,9 +206,9 @@ const ProductCard = ({
 		);
 	}
 
+	// Continue rendering even if there's a wishlist error
 	if (wishlistError) {
 		console.error("Wishlist error:", wishlistError);
-		// Continue rendering the product card without wishlist functionality
 	}
 
 	return (
