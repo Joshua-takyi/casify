@@ -14,7 +14,8 @@ export async function POST(req: Request) {
 		// Authenticate the user.
 		const session = await auth();
 		const userId = session?.user.id;
-		if (!userId) {
+		const accessToken = session?.user.accessToken;
+		if (!accessToken) {
 			logger.error("Unauthorized access attempt: no user ID found in session", {
 				userId,
 			});
@@ -87,6 +88,7 @@ export async function POST(req: Request) {
 			{
 				message: "Product added to wishlist successfully",
 				data: populatedWishlist,
+				token: accessToken,
 			},
 			{ status: 201 }
 		);

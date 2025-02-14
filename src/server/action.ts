@@ -1,6 +1,6 @@
 "use server";
 
-import {  signIn } from "@/auth";
+import { signIn } from "@/auth";
 import { ProductPropsForDb } from "@/types/products";
 import { SignInProps } from "@/types/user";
 import axios, { AxiosError } from "axios";
@@ -287,12 +287,9 @@ export async function CatchAllSlug({
 
 export async function AddToWishList(productId: string) {
 	try {
-		const res = await axios.post(
-			`${API_URL}/wishlist/add-wishlist`,
-			{ productId },
-
-			{ withCredentials: true }
-		);
+		const res = await axios.post(`${API_URL}/wishlist/add-wishlist`, {
+			productId,
+		});
 		if (res.status === 201) {
 			return {
 				success: true,
@@ -324,7 +321,6 @@ export async function RemoveFromWishlist(productId: string) {
 	try {
 		const res = await axios.delete(`${API_URL}/wishlist/remove-wishlist`, {
 			data: { productId },
-			withCredentials: true,
 		});
 		if (res.status !== 200) {
 			return {

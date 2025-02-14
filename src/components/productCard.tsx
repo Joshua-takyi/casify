@@ -1,19 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { BookmarkIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AddToWishList, RemoveFromWishlist } from "@/server/action";
+import axios, { AxiosError } from "axios";
 
 // -----------------------
 // Helper Functions
 // -----------------------
 
-// Formats a price into a currency string.
 const formatPrice = (price: number, currency = "GHS"): string => {
 	return new Intl.NumberFormat("en-GH", {
 		style: "currency",
@@ -21,7 +20,6 @@ const formatPrice = (price: number, currency = "GHS"): string => {
 	}).format(price);
 };
 
-// Truncates long product titles.
 const formatName = (title: string): string => {
 	return title.length > 20 ? `${title.slice(0, 20)}...` : title;
 };
@@ -30,7 +28,7 @@ const formatName = (title: string): string => {
 // Props Interface
 // -----------------------
 export interface ProductCardProps {
-	id?: string; // Product ID for wishlist operations.
+	id?: string;
 	title: string;
 	price: number;
 	images: string | string[];
@@ -53,31 +51,80 @@ const ProductCard = ({
 	model = "",
 	isNew = false,
 }: ProductCardProps) => {
-	// Local state for hover effect and wishlist status.
+	// State for hover effect
 	const [isHovered, setIsHovered] = useState(false);
-	const [isWishlist, setIsWishlist] = useState(false);
 
-	// Convert images and colors to arrays if needed.
+	// Convert images and colors to arrays for consistent handling
 	const imageArray = Array.isArray(images) ? images : [images];
-	const colorArray = Array.isArray(colors) ? colors : [colors];
+	const colorArray = Array.isArray(colors) ? colors : colors ? [colors] : [];
 
-	// Hooks for navigation and react-query.
 	const router = useRouter();
 	const queryClient = useQueryClient();
 
-	// -----------------------
-	// Wishlist Mutations
-	// -----------------------
+	const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+	useEffect(() => {
+		axios.defaults.withCredentials = true;
+	}, []);
+
+	// Fetch wishlist data
+	const {
+		data: wishlistData,
+		isLoading: wishlistLoading,
+		isError: wishlistError,
+	} = useQuery({
+		queryKey: ["wishlistData"],
+		queryFn: async () => {
+			try {
+				const response = await axios.get(`${API_URL}/wishlist/get-wishlist`, {
+					withCredentials: true,
+				});
+				return response.data.data;
+			} catch (error) {
+				// Handle error appropriately
+				console.error("Error fetching wishlist:", error);
+				throw error;
+			}
+		},
+		// Add error handling and retry options
+		retry: 2,
+		retryDelay: 1000,
+	});
+
+	interface WishlistItem {
+		productId: {
+			_id: string;
+		};
+	}
+
+	const isInWishlist: boolean =
+		wishlistData?.some((item: WishlistItem) => item.productId._id === id) ??
+		false;
+
+	// Wishlist mutations
 	const { mutate: addToWishlist } = useMutation({
 		mutationKey: ["wishlist"],
 		mutationFn: async (productId: string) => {
 			try {
-				const res = await AddToWishList(productId);
-				return res;
-			} catch (error) {
-				if (error instanceof Error) {
-					throw new Error(error.message);
+				const res = await axios.post(
+					`${API_URL}/wishlist/add-wishlist`,
+					{ productId },
+					{ withCredentials: true }
+				);
+
+				if (res.status === 201) {
+					return res.data;
 				}
+				throw new Error(`Failed to add product. Status: ${res.status}`);
+			} catch (error) {
+				if (axios.isAxiosError(error)) {
+					const axiosError = error as AxiosError<{ message?: string }>;
+					throw new Error(
+						axiosError.response?.data?.message ||
+							"Failed to add product to wishlist"
+					);
+				}
+				throw new Error("Failed to add product to wishlist");
 			}
 		},
 		onSuccess: () => {
@@ -85,10 +132,10 @@ const ProductCard = ({
 				richColors: false,
 				duration: 1500,
 			});
-			queryClient.invalidateQueries({ queryKey: ["wishListData"] });
+			queryClient.invalidateQueries({ queryKey: ["wishlistData"] });
 		},
 		onError: (error: Error) => {
-			toast.error(error.message);
+			toast.error(error.message || "An error occurred");
 		},
 	});
 
@@ -96,12 +143,24 @@ const ProductCard = ({
 		mutationKey: ["wishlist"],
 		mutationFn: async (productId: string) => {
 			try {
-				const res = await RemoveFromWishlist(productId);
-				return res;
-			} catch (error) {
-				if (error instanceof Error) {
-					throw new Error(error.message);
+				const res = await axios.delete(`${API_URL}/wishlist/remove-wishlist`, {
+					withCredentials: true,
+					data: { productId },
+				});
+
+				if (res.status === 200) {
+					return res.data;
 				}
+				throw new Error(`Failed to remove product. Status: ${res.status}`);
+			} catch (error) {
+				if (axios.isAxiosError(error)) {
+					const axiosError = error as AxiosError<{ message?: string }>;
+					throw new Error(
+						axiosError.response?.data?.message ||
+							"Failed to remove product from wishlist"
+					);
+				}
+				throw new Error("Failed to remove product from wishlist");
 			}
 		},
 		onSuccess: () => {
@@ -109,29 +168,29 @@ const ProductCard = ({
 				richColors: false,
 				duration: 1500,
 			});
-			queryClient.invalidateQueries({ queryKey: ["wishListData"] });
+			queryClient.invalidateQueries({ queryKey: ["wishlistData"] });
 		},
 		onError: (error: Error) => {
-			toast.error(error.message);
+			toast.error(error.message || "An error occurred");
 		},
 	});
 
-	// -----------------------
-	// Event Handlers
-	// -----------------------
-	// Toggle wishlist status and trigger appropriate mutation.
 	const handleWishlist = (e: React.MouseEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
-		setIsWishlist((prev) => !prev);
-		if (!isWishlist) {
-			addToWishlist(id as string);
+
+		if (!id) {
+			toast.error("Product ID is required for wishlist operations");
+			return;
+		}
+
+		if (!isInWishlist) {
+			addToWishlist(id);
 		} else {
-			removeFromWishlist(id as string);
+			removeFromWishlist(id);
 		}
 	};
 
-	// Generate a URL for a product variant based on color and model.
 	const getColorLink = (color: string): string => {
 		const params = new URLSearchParams();
 		if (color) params.append("color", color);
@@ -139,16 +198,29 @@ const ProductCard = ({
 		return `/product/get-item/${slug}?${params.toString()}`;
 	};
 
-	// Handle clicking on a color option.
 	const handleColorClick = (e: React.MouseEvent, color: string) => {
 		e.preventDefault();
 		e.stopPropagation();
 		router.push(getColorLink(color));
 	};
 
-	// -----------------------
-	// Render JSX
-	// -----------------------
+	if (wishlistLoading) {
+		return (
+			<div className="w-full border border-gray-200 bg-white p-4">
+				<div className="animate-pulse">
+					<div className="aspect-square w-full bg-gray-200" />
+					<div className="mt-4 h-4 w-2/3 bg-gray-200" />
+					<div className="mt-2 h-4 w-1/3 bg-gray-200" />
+				</div>
+			</div>
+		);
+	}
+
+	if (wishlistError) {
+		console.error("Wishlist error:", wishlistError);
+		// Continue rendering the product card without wishlist functionality
+	}
+
 	return (
 		<Link
 			href={`/product/${slug}`}
@@ -156,7 +228,6 @@ const ProductCard = ({
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>
-			{/* Image Container */}
 			<div className="relative">
 				<div className="relative aspect-square w-full overflow-hidden">
 					<Image
@@ -181,7 +252,6 @@ const ProductCard = ({
 					)}
 				</div>
 
-				{/* New Product Badge */}
 				{isNew && (
 					<div className="absolute left-0 top-0 bg-black px-2 py-1">
 						<span className="text-xs font-medium uppercase text-white">
@@ -190,21 +260,19 @@ const ProductCard = ({
 					</div>
 				)}
 
-				{/* Wishlist Toggle Button */}
 				<button
 					onClick={handleWishlist}
 					className="absolute right-2 top-2 rounded-full bg-white/80 p-1.5 backdrop-blur-sm transition-all duration-200 hover:bg-white cursor-pointer"
-					aria-label={isWishlist ? "Remove from wishlist" : "Add to wishlist"}
+					aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
 				>
 					<BookmarkIcon
 						className={`h-5 w-5 transition-colors duration-200 ${
-							isWishlist ? "fill-black text-black" : "text-gray-600"
+							isInWishlist ? "fill-black text-black" : "text-gray-600"
 						}`}
 					/>
 				</button>
 			</div>
 
-			{/* Product Information Section */}
 			<div className="border-t border-gray-200 p-4">
 				<h3 className="text-sm font-normal text-gray-900 mb-2">
 					{formatName(title)}
