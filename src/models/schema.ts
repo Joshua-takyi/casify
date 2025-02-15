@@ -13,6 +13,7 @@ const userSchema: Schema<UserProps> = new mongoose.Schema(
 		avatar: {
 			type: String,
 			required: false,
+			default: "",
 		},
 		email: {
 			type: String,

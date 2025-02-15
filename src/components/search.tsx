@@ -73,7 +73,7 @@ export default function SearchComponent() {
 	}, [isOpen]);
 
 	return (
-		<div className="relative">
+		<div className="relative ">
 			<button
 				onClick={() => setIsOpen(true)}
 				aria-expanded={isOpen}
@@ -87,7 +87,7 @@ export default function SearchComponent() {
 				{isOpen && (
 					<>
 						<motion.div
-							className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+							className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 "
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							exit={{ opacity: 0 }}

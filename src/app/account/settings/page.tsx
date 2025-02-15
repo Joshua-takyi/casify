@@ -21,6 +21,15 @@ const defaultProfile = {
 	ghanaPost: "GA-000-0000",
 };
 
+// Define the type for the API response
+type ProfileResponse = {
+	success: boolean;
+	message: string;
+	data: Array<{
+		userInfo: typeof defaultProfile;
+	}>;
+};
+
 export default function Profile() {
 	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
@@ -35,7 +44,7 @@ export default function Profile() {
 		}
 	};
 
-	const { data, isLoading } = useQuery({
+	const { data, isLoading } = useQuery<ProfileResponse>({
 		queryKey: ["profile"],
 		queryFn: async () => {
 			try {
@@ -47,21 +56,14 @@ export default function Profile() {
 				}
 				return res.data;
 			} catch (error: unknown) {
-				if (axios.isAxiosError(error)) {
-					// You can return a uniform error object
-					return {
-						success: false,
-						message:
-							error.response?.data?.message ||
-							"Failed to get data (Axios error)",
-						data: null,
-					};
-				}
-				// Non-Axios error fallback
+				// Return default profile with the expected data structure
 				return {
 					success: false,
-					message: "Failed to get data",
-					data: null,
+					message: axios.isAxiosError(error)
+						? error.response?.data?.message ||
+						  "Failed to get data (Axios error)"
+						: "Failed to get data",
+					data: [{ userInfo: defaultProfile }], // Maintain the expected array structure
 				};
 			}
 		},
