@@ -1,9 +1,12 @@
 "use server";
 
 import { signIn, signOut } from "@/auth";
+// import { Order } from "@/types/order";
+// import { OrderProduct } from "@/types/order";
 import { ProductPropsForDb } from "@/types/products";
 import { SignInProps } from "@/types/user";
 import axios, { AxiosError } from "axios";
+// import mongoose from "mongoose";
 import { redirect } from "next/navigation";
 // import { redirect } from "next/navigation";
 
@@ -291,3 +294,35 @@ export async function CatchAllSlug({
 		}
 	}
 }
+// export async function updateProductInventory(
+// 	products: Array<{ productId: string; quantity: number }>
+// ) {
+// 	try {
+// 		for (const product of products) {
+// 			await mongoose
+// 				.model("ProductModel")
+// 				.findByIdAndUpdate(
+// 					product.productId,
+// 					{ $inc: { stockQuantity: -product.quantity } },
+// 					{ new: true }
+// 				);
+// 		}
+// 	} catch (error) {
+// 		console.error("[Inventory] Failed to update product inventory:", error);
+// 		// You can decide whether to throw this error or handle it silently
+// 	}
+// }
+
+// // Helper function to send an order confirmation email
+// export async function sendOrderConfirmationEmail(order: Order) {
+// 	try {
+// 		// Implement your email sending logic (e.g., via SendGrid, AWS SES, etc.)
+// 		console.log(
+// 			"[Email] Order confirmation email would be sent for order:",
+// 			order._id
+// 		);
+// 	} catch (error) {
+// 		console.error("[Email] Failed to send order confirmation:", error);
+// 		// You can decide whether to throw this error or handle it silently
+// 	}
+// }

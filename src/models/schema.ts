@@ -118,6 +118,7 @@ const cartSchema: Schema<CartProps> = new mongoose.Schema(
 	},
 	{ timestamps: true }
 );
+// TTL Index: Delete carts that haven't been updated in 5 days (5 * 24 * 60 * 60 seconds)
 cartSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 5 * 24 * 60 * 60 });
 
 const deliverySchema: Schema<ShippingProps> = new mongoose.Schema(
@@ -190,7 +191,6 @@ const wishListSchema: Schema<WishListProps> = new Schema(
 	{ timestamps: true }
 );
 
-// TTL Index: Delete carts that haven't been updated in 5 days (5 * 24 * 60 * 60 seconds)
 const WishListModel: Model<WishListProps> =
 	mongoose.models.WishListModel ||
 	mongoose.model<WishListProps>("WishListModel", wishListSchema);
@@ -207,6 +207,7 @@ const CartModel: Model<CartProps> =
 	mongoose.model<CartProps>("CartModel", cartSchema);
 const CommentModel =
 	mongoose.models.CommentModel || mongoose.model("CommentModel", commentSchema);
+
 export {
 	UserModel,
 	CommentModel,
