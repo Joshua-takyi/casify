@@ -3,6 +3,7 @@ import { ProductProps, WishListProps } from "@/types/products";
 import { ShippingProps, UserProps } from "@/types/user";
 import mongoose, { Schema, Model, Types } from "mongoose";
 import { CartProps } from "@/types/cart";
+import { OrderDocument } from "@/types/order";
 
 const userSchema: Schema<UserProps> = new mongoose.Schema(
 	{
@@ -192,6 +193,45 @@ const wishListSchema: Schema<WishListProps> = new Schema(
 	{ timestamps: true }
 );
 
+const OrderProductSchema = new Schema({
+	productId: { type: Schema.Types.ObjectId, ref: "Product", required: true }, // Reference to the Product model
+	name: { type: String, required: true }, // Product name
+	price: { type: Number, required: true }, // Price per unit
+	quantity: { type: Number, required: true }, // Quantity ordered
+	color: { type: String, required: true }, // Product color
+	model: { type: String, required: true }, // Product model
+	image: { type: String, required: true }, // Product image URL
+});
+
+const OrderSchema = new Schema(
+	{
+		userId: { type: Schema.Types.ObjectId, ref: "UserModel", required: true }, // Reference to the User model
+		products: [OrderProductSchema], // Array of products in the order
+		total: { type: Number, required: true }, // Total amount of the order
+		status: {
+			type: String,
+			enum: ["pending", "paid", "shipped", "delivered", "cancelled"],
+			default: "pending",
+		}, // Order status
+		transactionRef: { type: String, required: true, unique: true }, // Paystack transaction reference
+		paymentStatus: {
+			type: String,
+			enum: ["pending", "success", "failed"],
+			default: "pending",
+		}, // Payment status
+		shippingAddress: {
+			street: { type: String, required: true },
+			city: { type: String, required: true },
+			region: { type: String, required: true },
+			country: { type: String, required: true },
+			ghanaPost: { type: String, required: true },
+		}, // Shipping address
+		createdAt: { type: Date, default: Date.now }, // Order creation date
+		updatedAt: { type: Date, default: Date.now }, // Last update date
+	},
+	{ timestamps: true }
+);
+
 const WishListModel: Model<WishListProps> =
 	mongoose.models.WishListModel ||
 	mongoose.model<WishListProps>("WishListModel", wishListSchema);
@@ -209,6 +249,10 @@ const CartModel: Model<CartProps> =
 const CommentModel =
 	mongoose.models.CommentModel || mongoose.model("CommentModel", commentSchema);
 
+const OrderModel: Model<OrderDocument> =
+	mongoose.models.OrderModel ||
+	mongoose.model<OrderDocument>("OrderModel", OrderSchema);
+
 export {
 	UserModel,
 	CommentModel,
@@ -216,4 +260,5 @@ export {
 	CartModel,
 	UserInfoModel,
 	WishListModel,
+	OrderModel,
 };

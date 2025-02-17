@@ -1,4 +1,6 @@
 "use client";
+
+import React from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -6,7 +8,6 @@ import Wrapper from "@/components/wrapper";
 import Image from "next/image";
 import ProductCard from "@/components/productCard";
 import Loading from "@/app/loading";
-import { useEffect, useState } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -22,42 +23,56 @@ export interface Product {
 	// other properties...
 }
 
+// Helper function to build the API URL based on filters
+const buildUrl = (
+	filters: {
+		category: string;
+		minPrice: number | null;
+		maxPrice: number | null;
+		sortBy: string | null;
+		onSale: boolean;
+		isNew: boolean;
+		model: string | null;
+		discountRange: number | null;
+	},
+	limit: number,
+	page: number
+): string => {
+	let url = `${API_URL}/products/get-item?limit=${limit}&page=${page}`;
+	if (filters.category) url += `&category=${filters.category}`;
+	if (filters.minPrice !== null) url += `&minPrice=${filters.minPrice}`;
+	if (filters.maxPrice !== null) url += `&maxPrice=${filters.maxPrice}`;
+	if (filters.sortBy) url += `&sortBy=${filters.sortBy}`;
+	if (filters.onSale) url += `&onSale=true`;
+	if (filters.isNew) url += `&isNew=true`;
+	if (filters.model) url += `&model=${filters.model}`;
+	if (filters.discountRange !== null)
+		url += `&discountRange=${filters.discountRange}`;
+	return url;
+};
+
 export default function CollectionPage() {
 	const searchParams = useSearchParams();
+
+	// Derive all query parameters directly from searchParams
 	const category = searchParams.get("category") ?? "";
 	const limit = Number(searchParams.get("limit") ?? 20);
 	const page = Number(searchParams.get("page") ?? 1);
-	const minPrice = Number(searchParams.get("minPrice")) || null;
-	const maxPrice = Number(searchParams.get("maxPrice")) || null;
-	const sortBy = searchParams.get("sortBy") ?? null;
+	const minPrice = searchParams.get("minPrice")
+		? Number(searchParams.get("minPrice"))
+		: null;
+	const maxPrice = searchParams.get("maxPrice")
+		? Number(searchParams.get("maxPrice"))
+		: null;
+	const sortBy = searchParams.get("sortBy") || null;
 	const onSale = searchParams.get("onSale") === "true";
 	const isNew = searchParams.get("isNew") === "true";
-	const model = searchParams.get("model") ?? null;
-	const discountRange = Number(searchParams.get("discountRange")) || null;
+	const model = searchParams.get("model") || null;
+	const discountRange = searchParams.get("discountRange")
+		? Number(searchParams.get("discountRange"))
+		: null;
 
-	const [filters, setFilters] = useState({
-		category: category,
-		minPrice: minPrice,
-		maxPrice: maxPrice,
-		sortBy: sortBy,
-		onSale: onSale,
-		isNew: isNew,
-		model: model,
-		discountRange: discountRange,
-	});
-
-	useEffect(() => {
-		setFilters({
-			category: category,
-			minPrice: minPrice,
-			maxPrice: maxPrice,
-			sortBy: sortBy,
-			onSale: onSale,
-			isNew: isNew,
-			model: model,
-			discountRange: discountRange,
-		});
-	}, [
+	const filters = {
 		category,
 		minPrice,
 		maxPrice,
@@ -66,7 +81,7 @@ export default function CollectionPage() {
 		isNew,
 		model,
 		discountRange,
-	]);
+	};
 
 	const {
 		data: products,
@@ -74,25 +89,14 @@ export default function CollectionPage() {
 		isError,
 		error,
 	} = useQuery<Product[], Error>({
-		queryKey: ["data", filters],
+		queryKey: ["products", filters, limit, page],
 		queryFn: async () => {
-			// Build the URL based on the active filters
-			let url = `${API_URL}/products/get-item?limit=${limit}&page=${page}`;
-
-			if (category) url += `&category=${category}`;
-			if (minPrice !== null) url += `&minPrice=${minPrice}`;
-			if (maxPrice !== null) url += `&maxPrice=${maxPrice}`;
-			if (sortBy) url += `&sortBy=${sortBy}`;
-			if (onSale) url += `&onSale=${onSale}`;
-			if (isNew) url += `&isNew=${isNew}`;
-			if (model) url += `&model=${model}`;
-			if (discountRange !== null) url += `&discountRange=${discountRange}`;
-
+			const url = buildUrl(filters, limit, page);
 			const res = await axios.get(url, {
 				headers: { Accept: "application/json" },
 			});
 			if (res.status === 200) {
-				// Assume response shape is { data: Product[] }
+				// Assuming the response shape is: { data: Product[] }
 				return res.data.data;
 			}
 			throw new Error("Failed to get data");
@@ -120,7 +124,7 @@ export default function CollectionPage() {
 			<div className="flex flex-col justify-center items-center h-screen">
 				<Image
 					src={`/images/empty-folder.png`}
-					alt={`empty folder`}
+					alt="Empty folder"
 					width={200}
 					height={200}
 					priority={true}
@@ -131,14 +135,9 @@ export default function CollectionPage() {
 	}
 
 	return (
-		<main className="@container md:py-12 sm:py-8">
+		<main className=" md:py-12 py-8">
 			<Wrapper>
-				{/*<FilterComponent*/}
-				{/*    onFilterChange={handleFilterChange}*/}
-				{/*    models={availableModels}*/}
-				{/*    discounts={availableDiscounts}*/}
-				{/*/>*/}
-				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 ">
 					{products.map((product) => (
 						<div key={product._id}>
 							<ProductCard

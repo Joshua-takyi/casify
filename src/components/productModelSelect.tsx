@@ -1,12 +1,5 @@
 "use client";
 import React from "react";
-import {
-	Select,
-	SelectTrigger,
-	SelectContent,
-	SelectItem,
-	SelectValue,
-} from "@/components/ui/select";
 
 interface ModelSelectProps {
 	itemModel: string[];
@@ -20,20 +13,19 @@ export default function SelectPhoneModel({
 	value,
 	onChange,
 }: ModelSelectProps) {
-	// Sorting logic
+	// Sorting logic (make a shallow copy before sorting)
 	const sortedModels = React.useMemo(() => {
-		return itemModel.sort((a, b) => {
-			// Prioritize 'pro max', then 'pro', then alphabetical
+		return [...itemModel].sort((a, b) => {
+			// Prioritize "pro max", then "pro", then alphabetical
 			const priorityOrder = ["pro max", "pro"];
 
 			for (const priority of priorityOrder) {
-				const aHasPriority = a.includes(priority);
-				const bHasPriority = b.includes(priority);
+				const aHasPriority = a.toLowerCase().includes(priority);
+				const bHasPriority = b.toLowerCase().includes(priority);
 
 				if (aHasPriority && !bHasPriority) return -1;
 				if (!aHasPriority && bHasPriority) return 1;
 			}
-
 			return a.localeCompare(b);
 		});
 	}, [itemModel]);
@@ -41,7 +33,7 @@ export default function SelectPhoneModel({
 	// Format model name
 	const formatModelName = (model: string) => {
 		return model
-			.replace("iphone", "")
+			.replace(/iphone/gi, "")
 			.trim()
 			.split(" ")
 			.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -49,23 +41,19 @@ export default function SelectPhoneModel({
 	};
 
 	return (
-		<div className="">
-			<Select value={value} onValueChange={onChange}>
-				<SelectTrigger className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 focus:border-gray-500 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-					<SelectValue placeholder="Choose a model" />
-				</SelectTrigger>
-				<SelectContent className="rounded-md border border-gray-300 bg-white shadow-sm">
-					{sortedModels.map((model) => (
-						<SelectItem
-							key={model}
-							value={model}
-							className="text-sm text-gray-700 hover:bg-gray-50"
-						>
-							{formatModelName(model)}
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
+		<div>
+			<select
+				value={value}
+				onChange={(e) => onChange(e.target.value)}
+				className="w-full border rounded-md  p-2 bg-transparent appearance-none outline-hidden focus:ring-1 focus:ring-gray-300 "
+			>
+				<option value="">Choose a model</option>
+				{sortedModels.map((model) => (
+					<option key={model} value={model}>
+						{formatModelName(model)}
+					</option>
+				))}
+			</select>
 		</div>
 	);
 }

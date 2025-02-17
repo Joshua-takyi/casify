@@ -136,17 +136,18 @@ export default function SearchCom() {
 
 				<section className="py-8">
 					{productCount > 0 ? (
-						<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+						<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 ">
 							{products.map((product: Product) => (
-								<ProductCard
-									key={product._id}
-									title={product.title}
-									price={product.price}
-									images={product.images}
-									slug={product.slug}
-									colors={product.colors}
-									isNew={product.isNewItem}
-								/>
+								<div key={product._id}>
+									<ProductCard
+										title={product.title}
+										price={product.price}
+										images={product.images}
+										slug={product.slug}
+										colors={product.colors}
+										isNew={product.isNewItem}
+									/>
+								</div>
 							))}
 						</div>
 					) : (

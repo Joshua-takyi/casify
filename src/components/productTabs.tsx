@@ -51,7 +51,7 @@ const TabComponent = ({ data }: TabComponentProps) => {
 				{/* Tab Content */}
 				<div className="mt-6 animate-fade-in">
 					{activeTab === "description" && (
-						<p className="text-[0.8rem] leading-7  text-pretty  text-gray-700">
+						<p className="text-[0.9rem] leading-7  text-pretty  text-gray-700">
 							{data.description || "No description available"}
 						</p>
 					)}
@@ -62,13 +62,13 @@ const TabComponent = ({ data }: TabComponentProps) => {
 								data.details.map((detail, index) => (
 									<li
 										key={index}
-										className="text-[0.8rem] leading-7  text-pretty text-gray-700 hover:text-gray-900 transition-colors"
+										className="text-[0.9rem] leading-7  text-pretty text-gray-700 hover:text-gray-900 transition-colors"
 									>
 										{detail}
 									</li>
 								))
 							) : (
-								<li className="text-[0.8rem] leading-7  text-pretty text-gray-500">
+								<li className="text-[0.9rem] leading-7  text-pretty text-gray-500">
 									No details available
 								</li>
 							)}
@@ -81,13 +81,13 @@ const TabComponent = ({ data }: TabComponentProps) => {
 								data.materials.map((material, index) => (
 									<li
 										key={index}
-										className="text-[0.8rem] leading-7  text-pretty text-gray-700 hover:text-gray-900 transition-colors"
+										className="text-[0.9rem] leading-7  text-pretty text-gray-700 hover:text-gray-900 transition-colors"
 									>
 										{material}
 									</li>
 								))
 							) : (
-								<li className="text-[0.8rem] leading-7  text-pretty text-gray-500">
+								<li className="text-[0.9rem] leading-7  text-pretty text-gray-500">
 									No materials listed
 								</li>
 							)}
@@ -100,13 +100,13 @@ const TabComponent = ({ data }: TabComponentProps) => {
 								data.features.map((feature, index) => (
 									<li
 										key={index}
-										className="text-[0.8rem] leading-7  text-pretty text-gray-700 hover:text-gray-900 transition-colors"
+										className="text-[0.9rem] leading-7  text-pretty text-gray-700 hover:text-gray-900 transition-colors"
 									>
 										{feature}
 									</li>
 								))
 							) : (
-								<li className="text-[0.8rem] leading-7  text-pretty text-gray-500">
+								<li className="text-[0.9rem] leading-7  text-pretty text-gray-500">
 									No features listed
 								</li>
 							)}

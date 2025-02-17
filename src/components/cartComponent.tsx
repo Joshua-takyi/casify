@@ -1,45 +1,57 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, {
+	useState,
+	useEffect,
+	useCallback,
+	useRef,
+	useMemo,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import axios, { AxiosError } from "axios";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import {
+	ShoppingCart,
+	X,
+	Plus,
+	Minus,
+	Trash2,
+	AlertCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ErrorBoundary } from "react-error-boundary";
 
-// Define the API URL from environment variables
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+/* ===================== */
+/*      Type Definitions */
+/* ===================== */
 
-// Function to format a number as Ghanaian Cedi currency
-const formatPrice = (amount: number): string => {
-	return new Intl.NumberFormat("en-GH", {
-		style: "currency",
-		currency: "GHS",
-		minimumFractionDigits: 2,
-	}).format(amount);
-};
+interface UserProfile {
+	_id: string;
+	userId: string;
+	userInfo: {
+		firstName: string;
+		lastName: string;
+		phone: string;
+		email: string;
+		city: string;
+		streetAddress: string;
+		region: string;
+		ghanaPost: string;
+	};
+	createdAt: string;
+	updatedAt: string;
+	__v: number;
+}
 
-// Dynamically import PaystackButton to ensure it only runs client-side
-const PaystackButtonWrapper = dynamic(
-	() => import("react-paystack").then((mod) => mod.PaystackButton),
-	{ ssr: false }
-);
-
-// -------------------------------------------------------------------
-// Type Definitions
-// -------------------------------------------------------------------
-
-// Represents an individual product item in the cart
-export interface CartProduct {
-	productId: string; // Assuming productId is stored as string after population
+interface CartProduct {
+	productId: string;
 	slug: string;
 	name: string;
 	price: number;
-	originalPrice: number;
-	discount?: number;
 	quantity: number;
 	color: string;
 	model: string;
@@ -48,180 +60,377 @@ export interface CartProduct {
 	stock: number;
 	available: boolean;
 }
-
-// Represents the cart data returned from the API
+interface ApiResponse<T> {
+	data: T[];
+}
 interface CartData {
 	products: CartProduct[];
 	total: number;
-	updatedAt: string; // ISO string
+	updatedAt: string;
+}
+interface CustomField {
+	display_name: string;
+	variable_name: string;
+	value: string | number;
 }
 
-// Represents the API response for getting the cart
-interface CartResponse {
-	data: CartData;
-	message?: string;
+interface PaystackMetadata {
+	custom_fields: CustomField[];
+	userId?: string;
+	shippingAddress?: {
+		street: string;
+		city: string;
+		region: string;
+		country: string;
+		ghanaPost: string;
+	};
+	products: {
+		productId: string;
+		name: string;
+		price: number;
+		quantity: number;
+		color: string;
+		model: string;
+		image: string;
+	}[];
 }
 
-// Variables used for updating the cart
-interface UpdateCartVars {
-	productId: string;
-	color: string;
-	model: string;
-	action: "increase" | "decrease" | "remove";
-}
-
-// Type for previous data snapshot during mutation
-// type PreviousCartData = CartResponse | undefined;
-
-// Props for the Paystack button wrapper
 interface PaystackProps {
 	email: string;
-	currency: string;
 	amount: number;
 	publicKey: string;
 	text: string;
 	onSuccess: (data: { reference: string }) => void;
 	onClose: () => void;
+	metadata: PaystackMetadata;
 }
 
-// Props for a single cart item component
+/* ===================== */
+/*      Constants        */
+/* ===================== */
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const PAYSTACK_KEY = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+
+if (!API_URL || !PAYSTACK_KEY) {
+	throw new Error("Missing required environment variables");
+}
+
+/* ===================== */
+/*    Axios Instance     */
+/* ===================== */
+
+const api = axios.create({
+	baseURL: API_URL,
+	timeout: 10000,
+	headers: { "Content-Type": "application/json" },
+});
+
+api.interceptors.response.use(
+	(response) => response,
+	async (error: AxiosError) => {
+		if (error.response?.status === 401) {
+			window.location.href = "/auth/login";
+			return Promise.reject(error);
+		}
+		if (error.response?.status === 429) {
+			const retryAfter = error.response.headers["retry-after"] || 2;
+			await new Promise((resolve) =>
+				setTimeout(resolve, parseInt(retryAfter as string) * 1000)
+			);
+			return api(error.config!);
+		}
+		return Promise.reject(error);
+	}
+);
+
+/* ===================== */
+/*   Utility Functions   */
+/* ===================== */
+
+/**
+ * Formats a number into a Ghanaian currency string.
+ */
+const formatPrice = (amount: number): string => {
+	try {
+		return new Intl.NumberFormat("en-GH", {
+			style: "currency",
+			currency: "GHS",
+			minimumFractionDigits: 2,
+		}).format(amount);
+	} catch (error) {
+		console.error("Price formatting error:", error);
+		return `GHS ${amount.toFixed(2)}`;
+	}
+};
+
+/**
+ * Validates an email address.
+ */
+const validateEmail = (email: string): boolean => {
+	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+/* ===================== */
+/*   Dynamic Imports     */
+/* ===================== */
+
+const PaystackButtonWrapper = dynamic(
+	() => import("react-paystack").then((mod) => mod.PaystackButton),
+	{
+		ssr: false,
+		loading: () => (
+			<div className="w-full h-12 bg-gray-100 animate-pulse rounded-md" />
+		),
+	}
+);
+
+/* ===================== */
+/*   Cart Item Component */
+/* ===================== */
+
 interface CartItemProps {
 	item: CartProduct;
+	onUpdateQuantity: (vars: {
+		productId: string;
+		color: string;
+		model: string;
+		action: "increase" | "decrease" | "remove";
+	}) => void;
+	isUpdating: boolean;
 }
 
-// -------------------------------------------------------------------
-// CartSheet Component
-// -------------------------------------------------------------------
+const CartItem: React.FC<CartItemProps> = React.memo(
+	({ item, onUpdateQuantity, isUpdating }) => (
+		<div className="flex items-center gap-3 p-3 border rounded-lg bg-white/50 hover:bg-white/80 transition-colors">
+			<div className="relative w-16 h-16">
+				<Image
+					src={item.image}
+					alt={item.name}
+					fill
+					className="rounded-md object-cover"
+					sizes="64px"
+					loading="lazy"
+				/>
+			</div>
+
+			<div className="flex-grow min-w-0">
+				<h3 className="font-medium text-sm truncate">{item.name}</h3>
+				<div className="text-xs text-gray-500 space-x-2">
+					<span>{item.color}</span>
+					<span>•</span>
+					<span>{item.model}</span>
+				</div>
+				{!item.available && (
+					<span className="text-red-500 text-xs">Currently unavailable</span>
+				)}
+			</div>
+
+			<div className="flex items-center gap-3">
+				<div className="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
+					<Button
+						size="sm"
+						variant="ghost"
+						onClick={() =>
+							onUpdateQuantity({
+								productId: item.productId,
+								color: item.color,
+								model: item.model,
+								action: "decrease",
+							})
+						}
+						disabled={item.quantity <= 1 || isUpdating || !item.available}
+						className="h-8 w-8"
+					>
+						<Minus className="w-3 h-3" />
+					</Button>
+
+					<span className="w-8 text-center text-sm font-medium">
+						{item.quantity}
+					</span>
+
+					<Button
+						size="sm"
+						variant="ghost"
+						onClick={() =>
+							onUpdateQuantity({
+								productId: item.productId,
+								color: item.color,
+								model: item.model,
+								action: "increase",
+							})
+						}
+						disabled={
+							item.quantity >= item.stock || isUpdating || !item.available
+						}
+						className="h-8 w-8"
+					>
+						<Plus className="w-3 h-3" />
+					</Button>
+				</div>
+
+				<span className="font-medium text-sm min-w-[80px] text-right">
+					{formatPrice(item.totalPrice)}
+				</span>
+
+				<Button
+					variant="ghost"
+					size="sm"
+					onClick={() =>
+						onUpdateQuantity({
+							productId: item.productId,
+							color: item.color,
+							model: item.model,
+							action: "remove",
+						})
+					}
+					disabled={isUpdating}
+					className="text-gray-400 hover:text-red-500 transition-colors h-8 w-8"
+				>
+					<Trash2 className="w-4 h-4" />
+				</Button>
+			</div>
+		</div>
+	)
+);
+
+CartItem.displayName = "CartItem";
+
+/* ===================== */
+/*      Main CartSheet   */
+/* ===================== */
+
 const CartSheet: React.FC = () => {
-	const [isOpen, setIsOpen] = useState<boolean>(false);
+	const [isOpen, setIsOpen] = useState(false);
+	const [isPaying, setIsPaying] = useState(false);
+	const [email, setEmail] = useState("");
+	const [emailError, setEmailError] = useState("");
+	const previousCartTotal = useRef<number>(0);
 	const queryClient = useQueryClient();
-	const [isPaying, setIsPaying] = useState<boolean>(false);
-	const [email, setEmail] = useState<string>("");
-	const [isClient, setIsClient] = useState<boolean>(false); // Client-side check
 
-	// Determine if we are running on the client
-	useEffect(() => {
-		setIsClient(true);
-	}, []);
+	/* --------------------- */
+	/*   Data Fetching Hooks */
+	/* --------------------- */
 
-	// Lock body scroll when cart is open
-	useEffect(() => {
-		document.body.style.overflow = isOpen ? "hidden" : "unset";
-		return () => {
-			document.body.style.overflow = "unset";
-		};
-	}, [isOpen]);
+	// Fetch user profile (assume response.data.data is an array and we take the first element)
+	const { data: userProfile, isLoading: isProfileLoading } = useQuery<
+		ApiResponse<UserProfile>,
+		Error,
+		UserProfile
+	>({
+		queryKey: ["userProfile"],
+		queryFn: async () => {
+			const res = await api.get("/profile/get-info");
+			return res.data;
+		},
+		// Add a select function to transform the response
+		select: (data) => data.data[0],
+		retry: 3,
+		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+		// onError: (error) => {
+		// 	console.error("Profile fetch error:", error);
+		// 	toast.error("Failed to load profile. Please refresh.");
+		// },
+	});
 
 	// Fetch cart data
-	const { data, isLoading, error, isFetching, refetch } =
-		useQuery<CartResponse>({
-			queryKey: ["cartData"],
-			queryFn: async () => {
-				try {
-					const res = await axios.get(`${API_URL}/cart/get-cart`);
-					if (res.status !== 200) {
-						throw new Error(`Failed to fetch cart (Status ${res.status})`);
-					}
-					return res.data;
-				} catch (error) {
-					const errorMessage =
-						error instanceof Error ? error.message : "Failed to fetch cart";
-					throw new Error(errorMessage);
-				}
-			},
-			refetchOnWindowFocus: false,
-			retry: 2,
-		});
+	const {
+		data: cartData,
+		isLoading: isCartLoading,
+		error: cartError,
+		refetch,
+	} = useQuery<{ data: CartData }>({
+		queryKey: ["cartData"],
+		queryFn: async () => {
+			const res = await api.get("/cart/get-cart");
+			return res.data;
+		},
+		// onError: (error) => {
+		// 	console.error("Cart fetch error:", error);
+		// 	toast.error("Failed to load cart. Please refresh.");
+		// },
+		refetchOnWindowFocus: false,
+	});
 
-	// Mutation for updating cart (increase, decrease, remove)
+	/* --------------------- */
+	/*       Mutations       */
+	/* --------------------- */
+
 	const updateQuantityMutation = useMutation({
-		mutationFn: async ({ productId, color, model, action }: UpdateCartVars) => {
-			try {
-				let res;
-				if (action === "remove") {
-					res = await axios.delete(`${API_URL}/cart/delete-cart`, {
-						data: { productId, color, model },
-					});
-				} else {
-					res = await axios.patch(`${API_URL}/cart/update-cart`, {
-						productId,
-						color,
-						model,
-						quantity: 1,
-						action: action === "increase" ? "increment" : "decrement",
-					});
-				}
-				if (res.status !== 200) {
-					throw new Error(`Failed to update cart (Status ${res.status})`);
-				}
-				return res.data;
-			} catch (error) {
-				const errorMessage =
-					error instanceof Error ? error.message : "Failed to update cart";
-				throw new Error(errorMessage);
+		mutationFn: async (vars: {
+			productId: string;
+			color: string;
+			model: string;
+			action: "increase" | "decrease" | "remove";
+		}) => {
+			if (vars.action === "remove") {
+				// DELETE request: send only the necessary data
+				await api.delete("/cart/delete-cart", {
+					data: {
+						productId: vars.productId,
+						color: vars.color,
+						model: vars.model,
+					},
+				});
+			} else {
+				// PATCH request: include quantity and map action to "increment"/"decrement"
+				const payload = {
+					productId: vars.productId,
+					color: vars.color,
+					model: vars.model,
+					quantity: 1,
+					action: vars.action === "increase" ? "increment" : "decrement",
+				};
+				await api.patch("/cart/update-cart", payload);
 			}
 		},
-		onMutate: async ({ productId, action, color, model }: UpdateCartVars) => {
-			await queryClient.cancelQueries({ queryKey: ["cartData"] });
-			const previousData = queryClient.getQueryData<CartResponse>(["cartData"]);
-			queryClient.setQueryData<CartResponse>(["cartData"], (old) => {
-				if (!old) return old;
-				const newData = JSON.parse(JSON.stringify(old)) as CartResponse;
-				const products = newData.data.products;
-				const productIndex = products.findIndex(
-					(p) =>
-						p.productId === productId && p.color === color && p.model === model
-				);
-
-				if (productIndex > -1) {
-					if (action === "remove") {
-						products.splice(productIndex, 1);
-					} else {
-						const delta = action === "increase" ? 1 : -1;
-						products[productIndex].quantity += delta;
-						products[productIndex].totalPrice =
-							products[productIndex].price * products[productIndex].quantity;
-					}
-					newData.data.total = products.reduce(
-						(sum, p) => sum + p.totalPrice,
-						0
-					);
-				}
-				return newData;
-			});
-			return { previousData };
-		},
-		onError: (err, variables, context) => {
-			queryClient.setQueryData(["cartData"], context?.previousData);
-			toast.error("Failed to update cart. Please try again.");
-		},
-		onSettled: () => {
+		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["cartData"] });
+		},
+		onError: (error) => {
+			console.error("Cart update error:", error);
+			toast.error("Failed to update cart. Please try again.");
 		},
 	});
 
-	// Derived values from cart data
-	const cartItems: CartProduct[] = data?.data?.products || [];
-	const cartTotal: number = data?.data?.total || 0;
-	const itemCount: number = cartItems.reduce(
-		(acc, item) => acc + item.quantity,
-		0
+	/* --------------------- */
+	/*    Derived Values     */
+	/* --------------------- */
+
+	const cartItems = useMemo(() => cartData?.data?.products || [], [cartData]);
+	const cartTotal = useMemo(() => cartData?.data?.total || 0, [cartData]);
+	const itemCount = useMemo(
+		() => cartItems.reduce((acc, item) => acc + item.quantity, 0),
+		[cartItems]
 	);
 
-	// Handler for quantity changes
-	const handleQuantityChange = (
-		productId: string,
-		action: "increase" | "decrease" | "remove",
-		color: string,
-		model: string
-	) => {
-		updateQuantityMutation.mutate({ productId, action, color, model });
-	};
+	/* --------------------- */
+	/*         Effects       */
+	/* --------------------- */
+
+	// Pre-fill email from profile
+	useEffect(() => {
+		if (userProfile?.userInfo?.email) {
+			setEmail(userProfile.userInfo.email);
+		}
+	}, [userProfile]);
+
+	// Invalidate profile if cart total changes
+	useEffect(() => {
+		if (cartTotal !== previousCartTotal.current) {
+			previousCartTotal.current = cartTotal;
+			queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+		}
+	}, [cartTotal, queryClient]);
+
+	/* --------------------- */
+	/*       Handlers        */
+	/* --------------------- */
 
 	// Clear the entire cart
 	const clearCart = useCallback(async () => {
 		try {
-			const response = await axios.post(`${API_URL}/cart/clear-cart`);
+			const response = await api.post("/cart/clear-cart");
 			if (response.status !== 200) {
 				console.error(
 					"Failed to clear cart. Server returned:",
@@ -242,7 +451,6 @@ const CartSheet: React.FC = () => {
 		}
 	}, [queryClient, refetch]);
 
-	// Handler for Paystack success
 	const handlePaystackSuccess = useCallback(
 		async (data: { reference: string }) => {
 			setIsPaying(false);
@@ -250,7 +458,9 @@ const CartSheet: React.FC = () => {
 			try {
 				const verificationResponse = await axios.post(
 					`${API_URL}/verify-payment`,
-					{ reference: data.reference }
+					{
+						reference: data.reference,
+					}
 				);
 				if (verificationResponse.data.status !== "success") {
 					toast.error("Payment verification failed. Please contact support.", {
@@ -265,11 +475,8 @@ const CartSheet: React.FC = () => {
 				toast.error(
 					`Failed to clear cart after successful payment: ${
 						error instanceof Error ? error.message : String(error)
-					},`,
-					{
-						richColors: false,
-						duration: 1000,
-					}
+					}`,
+					{ richColors: false, duration: 1000 }
 				);
 				console.error("Error during handlePaystackSuccess:", error);
 			}
@@ -277,190 +484,88 @@ const CartSheet: React.FC = () => {
 		[clearCart]
 	);
 
-	const handlePaystackClose = () => {
+	const handlePaystackClose = useCallback(() => {
 		setIsPaying(false);
-		toast.error("Payment cancelled.");
-	};
+		toast.error("Payment cancelled");
+	}, []);
 
-	// Paystack props for the dynamic button
-	const paystackProps: PaystackProps = {
-		email: email,
-		currency: "GHS",
-		amount: cartTotal * 100,
-		publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || "",
-		text: "Pay with Paystack",
-		onSuccess: handlePaystackSuccess,
-		onClose: handlePaystackClose,
-	};
-
-	// -------------------------------------------------------------------
-	// Cart Item Component
-	// -------------------------------------------------------------------
-	const CartItem: React.FC<CartItemProps> = ({ item }) => (
-		<div className="flex items-center gap-3 p-3 border rounded-lg bg-white/50 hover:bg-white/80 transition-colors">
-			<div className="flex-shrink-0">
-				<Image
-					src={item.image}
-					width={50}
-					height={50}
-					alt={item.name}
-					className="rounded-md object-cover"
-				/>
-			</div>
-
-			<div className="flex-grow min-w-0">
-				<h3 className="font-medium text-sm truncate">{item.name}</h3>
-				<div className="text-xs text-gray-500 space-x-2">
-					<span>{item.color}</span>
-					<span>•</span>
-					<span>{item.model}</span>
-				</div>
-			</div>
-
-			<div className="flex items-center gap-3">
-				<div className="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
-					<button
-						onClick={() =>
-							handleQuantityChange(
-								item.productId,
-								"decrease",
-								item.color,
-								item.model
-							)
-						}
-						className="p-1 hover:bg-gray-200 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-						disabled={item.quantity <= 1}
-					>
-						<Minus className="w-3 h-3" />
-					</button>
-
-					<motion.span
-						key={item.quantity}
-						initial={{ opacity: 0.6, scale: 0.8 }}
-						animate={{ opacity: 1, scale: 1 }}
-						className="w-6 text-center text-sm font-medium"
-					>
-						{item.quantity}
-					</motion.span>
-
-					<button
-						onClick={() =>
-							handleQuantityChange(
-								item.productId,
-								"increase",
-								item.color,
-								item.model
-							)
-						}
-						className="p-1 hover:bg-gray-200 rounded-md transition-colors"
-					>
-						<Plus className="w-3 h-3" />
-					</button>
-				</div>
-
-				<motion.span
-					key={item.totalPrice}
-					initial={{ opacity: 0.6 }}
-					animate={{ opacity: 1 }}
-					className="font-medium text-sm min-w-[80px] text-right"
-				>
-					{formatPrice(item.totalPrice)}
-				</motion.span>
-
-				<button
-					onClick={() =>
-						handleQuantityChange(
-							item.productId,
-							"remove",
-							item.color,
-							item.model
-						)
-					}
-					className="text-gray-400 hover:text-red-500 transition-colors p-1"
-				>
-					<Trash2 className="w-4 h-4" />
-				</button>
-			</div>
-		</div>
+	// Validate checkout conditions
+	const canCheckout = Boolean(
+		validateEmail(email) &&
+			userProfile?.userId !== undefined &&
+			userProfile?.userInfo?.streetAddress &&
+			cartItems.length > 0 &&
+			cartItems.every((item) => item.available)
 	);
 
-	// -------------------------------------------------------------------
-	// Render Cart Items
-	// -------------------------------------------------------------------
-	const renderCartItems = () => {
-		if (isLoading) {
-			return (
-				<div className="flex items-center justify-center h-full">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-				</div>
-			);
-		}
+	/* --------------------- */
+	/*    Paystack Settings  */
+	/* --------------------- */
 
-		if (error) {
-			return (
-				<div className="text-center py-8">
-					<p className="text-red-500">Error: {(error as Error).message}</p>
-				</div>
-			);
-		}
-
-		if (cartItems.length === 0) {
-			return (
-				<div className="text-center py-12">
-					<ShoppingCart className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-					<p className="text-gray-500 text-lg">Your cart is empty</p>
-					<p className="text-gray-400 text-sm mt-2">
-						Add items to start shopping
-					</p>
-				</div>
-			);
-		}
-
-		return (
-			<motion.div layout className="space-y-3">
-				{cartItems.map((item) => (
-					<motion.div
-						layout
-						key={`${item.productId}-${item.color}-${item.model}`}
-						initial={{ opacity: 0 }}
-						animate={{ opacity: 1 }}
-						exit={{ opacity: 0 }}
-						transition={{ duration: 0.2 }}
-					>
-						<CartItem item={item} />
-					</motion.div>
-				))}
-			</motion.div>
-		);
+	const paystackProps: PaystackProps & { currency: string } = {
+		// custom_fields: [],
+		email,
+		amount: cartTotal * 100, // Amount in pesewas
+		publicKey: PAYSTACK_KEY,
+		text: "Complete Payment",
+		currency: "GHS",
+		onSuccess: handlePaystackSuccess,
+		onClose: handlePaystackClose,
+		metadata: {
+			custom_fields: [], // providing an empty array to satisfy the type requirement
+			userId: userProfile?.userId,
+			shippingAddress: userProfile?.userInfo?.streetAddress
+				? {
+						street: userProfile.userInfo.streetAddress,
+						city: userProfile.userInfo.city,
+						region: userProfile.userInfo.region,
+						country: "Ghana",
+						ghanaPost: userProfile.userInfo.ghanaPost,
+				  }
+				: undefined,
+			products: cartItems.map((item) => ({
+				productId: item.productId,
+				name: item.name,
+				price: item.price,
+				quantity: item.quantity,
+				color: item.color,
+				model: item.model,
+				image: item.image,
+			})),
+		},
 	};
 
-	// -------------------------------------------------------------------
-	// Render Component
-	// -------------------------------------------------------------------
+	/* --------------------- */
+	/*     Render Component  */
+	/* --------------------- */
+
+	if (cartError) {
+		return (
+			<Alert variant="destructive">
+				<AlertCircle className="h-4 w-4" />
+				<AlertDescription>
+					Failed to load cart. Please refresh the page.
+				</AlertDescription>
+			</Alert>
+		);
+	}
+
 	return (
 		<>
 			<div className="relative">
 				<Button
 					variant="ghost"
 					size="icon"
-					className="relative group"
 					onClick={() => setIsOpen(true)}
-					disabled={isFetching}
+					disabled={isCartLoading}
+					aria-label="Shopping cart"
 				>
-					<ShoppingCart className="w-6 h-6 group-hover:text-primary transition-colors" />
-					<AnimatePresence mode="wait">
-						{itemCount > 0 && (
-							<motion.div
-								key="badge"
-								initial={{ scale: 0 }}
-								animate={{ scale: 1 }}
-								exit={{ scale: 0 }}
-								className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center"
-							>
-								{itemCount}
-							</motion.div>
-						)}
-					</AnimatePresence>
+					<ShoppingCart className="w-6 h-6" />
+					{itemCount > 0 && (
+						<span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+							{itemCount}
+						</span>
+					)}
 				</Button>
 			</div>
 
@@ -471,7 +576,6 @@ const CartSheet: React.FC = () => {
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 0.4 }}
 							exit={{ opacity: 0 }}
-							transition={{ duration: 0.2 }}
 							onClick={() => setIsOpen(false)}
 							className="fixed inset-0 bg-black z-40 backdrop-blur-sm"
 						/>
@@ -480,9 +584,9 @@ const CartSheet: React.FC = () => {
 							initial={{ x: "100%" }}
 							animate={{ x: 0 }}
 							exit={{ x: "100%" }}
-							transition={{ type: "tween", duration: 0.3 }}
 							className="fixed top-0 right-0 h-full w-full sm:w-[32rem] bg-gray-50 shadow-2xl z-50 flex flex-col"
 						>
+							{/* Header */}
 							<div className="flex items-center justify-between p-4 border-b bg-white">
 								<div className="flex items-center gap-3">
 									<ShoppingCart className="w-5 h-5 text-primary" />
@@ -490,68 +594,168 @@ const CartSheet: React.FC = () => {
 										Shopping Cart ({itemCount})
 									</h2>
 								</div>
-								<button
+								<Button
+									variant="ghost"
+									size="icon"
 									onClick={() => setIsOpen(false)}
-									className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+									className="rounded-full"
 								>
 									<X className="w-5 h-5" />
-								</button>
+								</Button>
 							</div>
 
-							<div className="flex-1 overflow-y-auto p-4">
-								{renderCartItems()}
+							{/* Cart Items */}
+							<div className="flex-1 overflow-y-auto p-4 space-y-4">
+								{isCartLoading ? (
+									<div className="space-y-4">
+										{[...Array(3)].map((_, i) => (
+											<div
+												key={i}
+												className="h-24 bg-gray-100 animate-pulse rounded-lg"
+											/>
+										))}
+									</div>
+								) : cartItems.length === 0 ? (
+									<div className="text-center py-12 text-gray-500">
+										Your cart is empty
+									</div>
+								) : (
+									cartItems.map((item) => (
+										<CartItem
+											key={`${item.productId}-${item.color}-${item.model}`}
+											item={item}
+											onUpdateQuantity={updateQuantityMutation.mutate}
+											isUpdating={updateQuantityMutation.isPending} // Updated here
+										/>
+									))
+								)}
 							</div>
 
+							{/* Checkout Section */}
 							<div className="border-t bg-white p-4 space-y-4">
 								<div className="space-y-2">
-									<div className="flex justify-between text-sm">
-										<span className="text-gray-500">Subtotal</span>
-										<motion.span
-											key={cartTotal}
-											initial={{ opacity: 0.6 }}
-											animate={{ opacity: 1 }}
-										>
-											{formatPrice(cartTotal)}
-										</motion.span>
+									<div className="flex justify-between">
+										<span>Subtotal:</span>
+										<span>{formatPrice(cartTotal)}</span>
 									</div>
-									<div className="flex justify-between text-sm">
-										<span className="text-gray-500">Delivery</span>
-										<span>Free</span>
+									<div className="flex justify-between">
+										<span>Delivery:</span>
+										<span> (Motorbike - Fee Applies)</span>
 									</div>
-									<div className="flex justify-between text-lg font-semibold">
-										<span>Total</span>
-										<motion.span
-											key={cartTotal}
-											initial={{ opacity: 0.6 }}
-											animate={{ opacity: 1 }}
-										>
-											{formatPrice(cartTotal)}
-										</motion.span>
+									<div className="flex justify-between font-semibold">
+										<span>Total:</span>
+										<span>{formatPrice(cartTotal)}</span>
 									</div>
 								</div>
-								{isClient && (
-									<input
-										type="email"
-										placeholder="Enter your email"
-										value={email}
-										onChange={(e) => setEmail(e.target.value)}
-										className="w-full p-2 border rounded-md"
-									/>
+
+								{cartItems.some((item) => !item.available) && (
+									<Alert variant="destructive" className="mt-4">
+										<AlertCircle className="h-4 w-4" />
+										<AlertDescription>
+											Some items in your cart are currently unavailable. Please
+											remove them to proceed.
+										</AlertDescription>
+									</Alert>
 								)}
-								{isClient &&
-									(process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY && email ? (
-										<PaystackButtonWrapper
-											{...paystackProps}
-											className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-											disabled={isPaying}
-										/>
+
+								<div className="space-y-4">
+									{isProfileLoading ? (
+										<div className="space-y-4">
+											<div className="h-12 bg-gray-100 animate-pulse rounded-md" />
+											<div className="h-12 bg-gray-100 animate-pulse rounded-md" />
+										</div>
 									) : (
-										<Button disabled={!email} className="w-full">
-											{process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
-												? "Enter Email to Pay"
-												: "Paystack Key Not Configured"}
-										</Button>
-									))}
+										<>
+											<div className="space-y-2">
+												<input
+													type="email"
+													placeholder="Email address"
+													value={email}
+													onChange={(e) => {
+														setEmail(e.target.value);
+														if (!validateEmail(e.target.value)) {
+															setEmailError(
+																"Please enter a valid email address"
+															);
+														} else {
+															setEmailError("");
+														}
+													}}
+													className={`w-full p-3 border rounded-md transition-colors ${
+														emailError ? "border-red-500" : "border-gray-200"
+													}`}
+													disabled={userProfile?.userInfo?.email !== undefined}
+													aria-invalid={Boolean(emailError)}
+													aria-describedby={
+														emailError ? "email-error" : undefined
+													}
+												/>
+												{emailError && (
+													<p id="email-error" className="text-red-500 text-sm">
+														{emailError}
+													</p>
+												)}
+											</div>
+
+											{!userProfile?.userInfo?.streetAddress && (
+												<Alert>
+													<AlertCircle className="h-4 w-4" />
+													<AlertDescription>
+														Please complete your shipping information in your
+														profile to proceed with checkout.
+													</AlertDescription>
+												</Alert>
+											)}
+
+											<div className="space-y-2">
+												{cartItems.length > 0 && (
+													<PaystackButtonWrapper
+														{...paystackProps}
+														className={`w-full py-3 rounded-md font-medium transition-all ${
+															canCheckout
+																? "bg-green-600 hover:bg-green-700 text-white"
+																: "bg-gray-100 text-gray-400 cursor-not-allowed"
+														}`}
+														disabled={!canCheckout || isPaying}
+													/>
+												)}
+												{isPaying && (
+													<div className="flex items-center justify-center">
+														<div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600" />
+													</div>
+												)}
+												{!canCheckout && cartItems.length > 0 && (
+													<p className="text-sm text-gray-500 text-center">
+														{!validateEmail(email)
+															? "Please enter a valid email address"
+															: !userProfile?.userInfo?.streetAddress
+															? "Complete your shipping information to proceed"
+															: cartItems.some((item) => !item.available)
+															? "Remove unavailable items to proceed"
+															: "Unable to proceed with checkout"}
+													</p>
+												)}
+											</div>
+										</>
+									)}
+								</div>
+
+								<div className="text-xs text-gray-500 text-center mt-4">
+									By completing your purchase, you agree to our{" "}
+									<button
+										onClick={() => window.open("/terms", "_blank")}
+										className="text-primary hover:underline"
+									>
+										Terms of Service
+									</button>{" "}
+									and{" "}
+									<button
+										onClick={() => window.open("/privacy", "_blank")}
+										className="text-primary hover:underline"
+									>
+										Privacy Policy
+									</button>
+								</div>
 							</div>
 						</motion.div>
 					</>
@@ -561,4 +765,25 @@ const CartSheet: React.FC = () => {
 	);
 };
 
-export default CartSheet;
+/* ===================== */
+/*   Error Boundary      */
+/* ===================== */
+
+const CartSheetWithErrorBoundary: React.FC = () => {
+	return (
+		<ErrorBoundary
+			FallbackComponent={({ error }) => (
+				<Alert variant="destructive">
+					<AlertCircle className="h-4 w-4" />
+					<AlertDescription>
+						Something went wrong: {error.message}
+					</AlertDescription>
+				</Alert>
+			)}
+		>
+			<CartSheet />
+		</ErrorBoundary>
+	);
+};
+
+export default CartSheetWithErrorBoundary;
