@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import Link from "next/link";
+import SignOutBtn from "@/app/(with-nav)/components/signOutBtn";
 
 const AccountDropdown = () => {
 	return (
@@ -36,9 +37,7 @@ const AccountDropdown = () => {
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem asChild>
-						<Link href="/auth/sign-in" className="w-full">
-							Sign In
-						</Link>
+						<SignOutBtn />
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>

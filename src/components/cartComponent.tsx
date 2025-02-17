@@ -130,7 +130,7 @@ api.interceptors.response.use(
 	(response) => response,
 	async (error: AxiosError) => {
 		if (error.response?.status === 401) {
-			window.location.href = "/auth/login";
+			window.location.href = "/auth/sign-in";
 			return Promise.reject(error);
 		}
 		if (error.response?.status === 429) {

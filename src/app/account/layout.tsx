@@ -13,11 +13,9 @@ export default async function AccountLayout({
 		redirect("/auth/sign-in");
 	}
 	return (
-		<div className="flex h-screen">
+		<div>
 			<AccountSideBar />
-			<main className="flex-1 overflow-x-hidden overflow-y-auto ">
-				{children}
-			</main>
+			<main>{children}</main>
 		</div>
 	);
 }
