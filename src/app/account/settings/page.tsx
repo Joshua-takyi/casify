@@ -1,14 +1,12 @@
 "use client";
 import Wrapper from "@/components/wrapper";
 import { ProfileTabs } from "../components/tabs";
-import { Camera, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import { GetUserInfo } from "@/server/action";
 
 const defaultProfile = {
 	firstName: "John",
@@ -25,47 +23,25 @@ const defaultProfile = {
 type ProfileResponse = {
 	success: boolean;
 	message: string;
-	data: Array<{
-		userInfo: typeof defaultProfile;
-	}>;
+	data: Array<{ userInfo: typeof defaultProfile }>;
 };
 
 export default function Profile() {
-	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-
-	const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (file) {
-			const reader = new FileReader();
-			reader.onloadend = () => {
-				setAvatarPreview(reader.result as string);
-			};
-			reader.readAsDataURL(file);
-		}
-	};
+	const [avatarPreview] = useState<string | null>(null);
 
 	const { data, isLoading } = useQuery<ProfileResponse>({
 		queryKey: ["profile"],
 		queryFn: async () => {
-			try {
-				const res = await axios.get(`${API_URL}/profile/get-info`, {
-					withCredentials: true,
-				});
-				if (res.status !== 200) {
-					throw new Error("Failed to get data");
-				}
-				return res.data;
-			} catch (error: unknown) {
-				// Return default profile with the expected data structure
+			const res = await GetUserInfo();
+			// If res is undefined or its data is undefined, return a default structure:
+			if (!res || !res.data) {
 				return {
 					success: false,
-					message: axios.isAxiosError(error)
-						? error.response?.data?.message ||
-						  "Failed to get data (Axios error)"
-						: "Failed to get data",
-					data: [{ userInfo: defaultProfile }], // Maintain the expected array structure
+					message: "No data",
+					data: [{ userInfo: defaultProfile }],
 				};
 			}
+			return res.data;
 		},
 	});
 
@@ -98,23 +74,10 @@ export default function Profile() {
 								/>
 							) : (
 								<div className="flex h-full items-center justify-center text-2xl font-semibold text-gray-400">
-									{profile.firstName?.charAt(0) || "J"}
+									{profile.firstName?.slice(4, 1).toUpperCase() || "J"}
 								</div>
 							)}
 						</div>
-						<label
-							htmlFor="avatar-upload"
-							className="absolute bottom-0 right-0 cursor-pointer rounded-full bg-white p-2 shadow-sm transition-colors hover:bg-gray-50"
-						>
-							<Camera className="h-5 w-5 text-gray-600" />
-							<input
-								type="file"
-								id="avatar-upload"
-								className="hidden"
-								accept="image/*"
-								onChange={handleAvatarChange}
-							/>
-						</label>
 					</div>
 
 					{/* Name and Location Section */}

@@ -12,7 +12,6 @@
 /*	font-display: swap;*/
 /*}*/
 
-
 @theme {
 	--radius-lg: var(--radius);
 	--radius-md: calc(var(--radius) - 2px);
@@ -52,9 +51,7 @@
 	--color-chart-4: hsl(var(--chart-4));
 	--color-chart-5: hsl(var(--chart-5));
 	/*--font-family-apercu-pro: "apercuMono", sans-serif;*/
-
 }
-
 
 @layer base {
 	*,
@@ -65,7 +62,6 @@
 		border-color: var(--color-gray-200, currentColor);
 	}
 }
-
 
 @layer base {
 	:root {
@@ -130,7 +126,7 @@
 		@apply bg-background text-foreground;
 	}
 
-	.header{
+	.header {
 		font-weight: bold;
 		@container (width >= 38rem) {
 			font-size: clamp(0.5rem, 2vw, 1.3rem);
@@ -148,12 +144,12 @@
 			font-size: clamp(2rem, 3vw, 4rem);
 		}
 	}
-	h2{
+	h2 {
 		@container (width >= 38rem) {
-			
+			font-size: clamp(2rem, 2vw, 5rem);
 		}
 	}
-	.title{
+	.title {
 		@container (width >= 38rem) {
 			font-size: clamp(0.8rem, 2vw, 1.3rem);
 		}
@@ -161,14 +157,8 @@
 			font-size: clamp(1rem, 2vw, 1.7rem);
 		}
 	}
-	.imgBg{
+	.imgBg {
 		mix-blend-mode: multiply;
 		background-color: transparent;
 	}
-}	
-
-
-
-
-
-
+}

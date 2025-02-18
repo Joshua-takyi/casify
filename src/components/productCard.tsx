@@ -61,18 +61,18 @@ const ProductCard = ({
 	return (
 		<Link
 			href={`/product/${slug}`}
-			className="group relative block w-full border border-gray-200 bg-white rounded-md overflow-hidden"
+			className="group relative block w-full bg-transparent"
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>
 			<div className="relative">
-				<div className="relative aspect-square w-full overflow-hidden">
+				<div className="relative aspect-[5/5] w-full overflow-hidden">
 					<Image
 						src={imageArray[0]}
 						alt={title}
 						fill
 						sizes="(max-width: 640px) 90vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-						className="object-cover transition-opacity duration-300"
+						className="object-cover transition-opacity duration-300 imgBg aspect-square"
 						style={{ opacity: isHovered && imageArray.length > 1 ? 0 : 1 }}
 						priority={false}
 					/>
@@ -82,7 +82,7 @@ const ProductCard = ({
 							alt={`${title} - alternate view`}
 							fill
 							sizes="(max-width: 640px) 90vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-							className="object-cover transition-opacity duration-300"
+							className="object-cover transition-opacity duration-300 imgBg"
 							style={{ opacity: isHovered ? 1 : 0 }}
 							priority={false}
 						/>

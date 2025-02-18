@@ -24,6 +24,7 @@ export interface ProductProps extends Document {
 	reviews?: string[];
 	materials: string[];
 	colors: string[];
+	featured: boolean;
 	comments?: string[];
 }
 

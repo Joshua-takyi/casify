@@ -58,6 +58,7 @@ const productSchema: Schema<ProductProps> = new mongoose.Schema(
 		salesEndAt: { type: Date, default: null, required: false },
 		rating: { type: Number, min: 0, max: 5 },
 		reviews: { type: [String], default: [] },
+		featured: { type: Boolean, default: false },
 		materials: { type: [String], required: true },
 		colors: { type: [String], required: true },
 		comments: { type: [String], default: [] },

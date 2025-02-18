@@ -1,14 +1,10 @@
 "use server";
 
 import { signIn, signOut } from "@/auth";
-// import { Order } from "@/types/order";
-// import { OrderProduct } from "@/types/order";
 import { ProductPropsForDb } from "@/types/products";
 import { SignInProps } from "@/types/user";
 import axios, { AxiosError } from "axios";
-// import mongoose from "mongoose";
 import { redirect } from "next/navigation";
-// import { redirect } from "next/navigation";
 
 interface SignUpData {
 	name: string;
@@ -294,35 +290,105 @@ export async function CatchAllSlug({
 		}
 	}
 }
-// export async function updateProductInventory(
-// 	products: Array<{ productId: string; quantity: number }>
-// ) {
-// 	try {
-// 		for (const product of products) {
-// 			await mongoose
-// 				.model("ProductModel")
-// 				.findByIdAndUpdate(
-// 					product.productId,
-// 					{ $inc: { stockQuantity: -product.quantity } },
-// 					{ new: true }
-// 				);
-// 		}
-// 	} catch (error) {
-// 		console.error("[Inventory] Failed to update product inventory:", error);
-// 		// You can decide whether to throw this error or handle it silently
-// 	}
-// }
 
-// // Helper function to send an order confirmation email
-// export async function sendOrderConfirmationEmail(order: Order) {
-// 	try {
-// 		// Implement your email sending logic (e.g., via SendGrid, AWS SES, etc.)
-// 		console.log(
-// 			"[Email] Order confirmation email would be sent for order:",
-// 			order._id
-// 		);
-// 	} catch (error) {
-// 		console.error("[Email] Failed to send order confirmation:", error);
-// 		// You can decide whether to throw this error or handle it silently
-// 	}
-// }
+export async function GetIsOnSale(limit: number) {
+	try {
+		const res = await axios.get(
+			`${API_URL}/products/get-item?isOnSale=true&sortVy=price&limit=${limit}`
+		);
+		if (res.status === 200) {
+			return {
+				success: true,
+				message: res.data.message,
+				data: res.data.data,
+			};
+		}
+		throw new Error("failed to get data");
+	} catch (error) {
+		if (error instanceof AxiosError) {
+			const axiosError = error as AxiosError<{ message?: string }>;
+			let errorMessage = "failed to get data";
+			if (axiosError?.response?.data.message) {
+				errorMessage = axiosError.message;
+			}
+			return {
+				success: false,
+				message: errorMessage,
+			};
+		}
+
+		return {
+			success: false,
+			message: "data fetching failed",
+		};
+	}
+}
+// ... existing imports ...
+
+// Add this interface near the top with other interfaces
+
+export async function GetUserInfo() {
+	try {
+		const response = await axios.get(`${API_URL}/profile/get-info`);
+
+		if (response.status === 200) {
+			return {
+				success: true,
+				data: response.data,
+				message: "User info fetched successfully",
+			};
+		}
+
+		throw new Error(`Unexpected status code: ${response.status}`);
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			const axiosError = error as AxiosError<{ message?: string }>;
+			let errorMessage = "Failed to fetch user info";
+
+			if (axiosError.response?.data?.message) {
+				errorMessage = axiosError.response.data.message;
+			}
+
+			return {
+				success: false,
+				message: errorMessage,
+			};
+		}
+
+		return {
+			success: false,
+			message: "Failed to fetch user info",
+		};
+	}
+}
+
+export async function GetFeatured() {
+	try {
+		const res = await axios.get(`${API_URL}/products/get-item?featured=true`);
+		if (res.status === 200) {
+			return {
+				success: true,
+				message: "date fetched successfully",
+				data: res.data.data,
+			};
+		}
+		throw new Error("failed to get data)");
+	} catch (error) {
+		if (axios.AxiosError) {
+			const axiosError = error as AxiosError<{ message?: string }>;
+			let errorMessage = "failed to get data";
+			if (axiosError.response?.data.message) {
+				errorMessage = axiosError.response.data.message;
+				return {
+					success: false,
+					message: errorMessage,
+				};
+			}
+		}
+		const errorMessage = "failed to get data";
+		return {
+			success: false,
+			message: errorMessage,
+		};
+	}
+}

@@ -10,6 +10,7 @@ import Wrapper from "@/components/wrapper";
 import { Product } from "@/app/(with-nav)/components/collectionPage";
 import ProductCard from "@/components/productCard";
 import NoResultsFound from "./emptySearch";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Define our primary color
 // const PRIMARY_COLOR = "#868b92";
@@ -100,14 +101,31 @@ export default function SearchCom() {
 	const productCount = products.length;
 
 	return (
-		<div className="min-h-screen">
+		<motion.div
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			className="min-h-screen"
+		>
 			<Wrapper>
-				<div className="w-full md:h-[30dvh] flex justify-center items-center py-8 md:py-0">
+				<motion.div
+					initial={{ y: 20 }}
+					animate={{ y: 0 }}
+					className="w-full md:h-[30dvh] flex justify-center items-center py-8 md:py-0"
+				>
 					<div className="flex flex-col gap-y-6 items-center justify-between w-full max-w-2xl px-4">
-						<h1 className="md:text-3xl text-2xl font-medium text-[#868b92]">
+						<motion.h1
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							className="md:text-4xl text-3xl font-medium text-[#868b92]"
+						>
 							Results for &quot;{query}&quot;
-						</h1>
-						<div className="w-full flex flex-col md:flex-row gap-3">
+						</motion.h1>
+						<motion.div
+							initial={{ y: 10, opacity: 0 }}
+							animate={{ y: 0, opacity: 1 }}
+							transition={{ delay: 0.2 }}
+							className="w-full flex flex-col md:flex-row gap-3"
+						>
 							<div className="relative flex-1">
 								<input
 									type="text"
@@ -115,48 +133,78 @@ export default function SearchCom() {
 									value={searchInput}
 									onChange={handleSearchInput}
 									onKeyPress={handleKeyPress}
-									className="w-full h-11 px-4 rounded-md border border-[#868b92] outline-none"
+									className="w-full h-12 px-4 rounded-md border border-[#868b92] outline-none transition-all duration-200 focus:border-black focus:shadow-sm"
 								/>
-								<MagnifyingGlassIcon className="h-5 w-5 absolute top-3 right-3 text-[#868b92]" />
+								<MagnifyingGlassIcon className="h-5 w-5 absolute top-3.5 right-3 text-[#868b92]" />
 							</div>
-							<button
+							<motion.button
+								whileHover={{ scale: 1.02 }}
+								whileTap={{ scale: 0.98 }}
 								onClick={handleSearch}
-								className={`h-11 rounded-md cursor-pointer bg-[#868b92] text-white ${
+								className={`h-12 rounded-md cursor-pointer bg-[#868b92] text-white transition-colors hover:bg-black ${
 									mobile ? "px-4" : "px-6"
 								}`}
 							>
 								Search
-							</button>
-						</div>
-						<p className="text-[#868b92] text-sm">
+							</motion.button>
+						</motion.div>
+						<motion.p
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ delay: 0.3 }}
+							className="text-[#868b92] text-sm"
+						>
 							{`Products (${productCount})`}
-						</p>
+						</motion.p>
 					</div>
-				</div>
+				</motion.div>
 
-				<section className="py-8">
-					{productCount > 0 ? (
-						<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 ">
-							{products.map((product: Product) => (
-								<div key={product._id}>
-									<ProductCard
-										title={product.title}
-										price={product.price}
-										images={product.images}
-										slug={product.slug}
-										colors={product.colors}
-										isNew={product.isNewItem}
-									/>
-								</div>
-							))}
-						</div>
-					) : (
-						<section>
-							<NoResultsFound onBrowseAll={handleSearch} query={query} />
-						</section>
-					)}
-				</section>
+				<motion.section
+					initial={{ y: 20, opacity: 0 }}
+					animate={{ y: 0, opacity: 1 }}
+					transition={{ delay: 0.4 }}
+					className="py-8"
+				>
+					<AnimatePresence mode="wait">
+						{productCount > 0 ? (
+							<motion.div
+								key="results"
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								exit={{ opacity: 0, y: -20 }}
+								className="grid grid-cols-2 md:grid-cols-4 gap-4"
+							>
+								{products.map((product: Product, index: number) => (
+									<motion.div
+										key={product._id}
+										initial={{ opacity: 0, y: 20 }}
+										animate={{ opacity: 1, y: 0 }}
+										transition={{ delay: index * 0.1 }}
+									>
+										<ProductCard
+											title={product.title}
+											price={product.price}
+											images={product.images}
+											slug={product.slug}
+											colors={product.colors}
+											isNew={product.isNewItem}
+										/>
+									</motion.div>
+								))}
+							</motion.div>
+						) : (
+							<motion.section
+								key="no-results"
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+							>
+								<NoResultsFound onBrowseAll={handleSearch} query={query} />
+							</motion.section>
+						)}
+					</AnimatePresence>
+				</motion.section>
 			</Wrapper>
-		</div>
+		</motion.div>
 	);
 }

@@ -32,7 +32,7 @@ export const BuildQuery = (
 			// and allow any number of spaces or hyphens between words.
 			const flexibleTerm = searchTerm
 				.split(/\s+/)
-				.map(word => word + "s?") // allow for optional plural 's'
+				.map((word) => word + "s?") // allow for optional plural 's'
 				.join("[-\\s]*");
 			const regex = new RegExp(flexibleTerm, "i");
 
@@ -84,6 +84,7 @@ export const BuildQuery = (
 	handleBooleanParam("isFeatured");
 	handleBooleanParam("isBestSeller");
 	handleBooleanParam("available");
+	handleBooleanParam("featured");
 
 	// Date fields
 	const handleDateParam = (paramName: string) => {

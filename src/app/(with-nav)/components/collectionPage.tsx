@@ -1,13 +1,15 @@
 "use client";
-
-import React from "react";
+import React, { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import axios, { AxiosError } from "axios";
 import Wrapper from "@/components/wrapper";
 import Image from "next/image";
 import ProductCard from "@/components/productCard";
 import Loading from "@/app/loading";
+import FilterComponent from "@/components/filter";
+import { useInView } from "react-intersection-observer";
+import { motion, AnimatePresence } from "framer-motion";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -20,10 +22,9 @@ export interface Product {
 	colors: string[];
 	images: string[];
 	isNewItem: boolean;
-	// other properties...
+	// other fields like category, etc.
 }
 
-// Helper function to build the API URL based on filters
 const buildUrl = (
 	filters: {
 		category: string;
@@ -33,6 +34,7 @@ const buildUrl = (
 		onSale: boolean;
 		isNew: boolean;
 		model: string | null;
+		featured: boolean;
 		discountRange: number | null;
 	},
 	limit: number,
@@ -48,16 +50,16 @@ const buildUrl = (
 	if (filters.model) url += `&model=${filters.model}`;
 	if (filters.discountRange !== null)
 		url += `&discountRange=${filters.discountRange}`;
+	if (filters.featured) url += `&featured=true`;
 	return url;
 };
 
 export default function CollectionPage() {
 	const searchParams = useSearchParams();
 
-	// Derive all query parameters directly from searchParams
+	// Derive parameters from searchParams
 	const category = searchParams.get("category") ?? "";
 	const limit = Number(searchParams.get("limit") ?? 20);
-	const page = Number(searchParams.get("page") ?? 1);
 	const minPrice = searchParams.get("minPrice")
 		? Number(searchParams.get("minPrice"))
 		: null;
@@ -68,6 +70,7 @@ export default function CollectionPage() {
 	const onSale = searchParams.get("onSale") === "true";
 	const isNew = searchParams.get("isNew") === "true";
 	const model = searchParams.get("model") || null;
+	const featured = searchParams.get("featured") === "true";
 	const discountRange = searchParams.get("discountRange")
 		? Number(searchParams.get("discountRange"))
 		: null;
@@ -78,50 +81,75 @@ export default function CollectionPage() {
 		maxPrice,
 		sortBy,
 		onSale,
+		featured,
 		isNew,
 		model,
 		discountRange,
 	};
 
+	// Infinite query to load products
 	const {
-		data: products,
+		data: response,
 		isLoading,
 		isError,
 		error,
-	} = useQuery<Product[], Error>({
-		queryKey: ["products", filters, limit, page],
-		queryFn: async () => {
-			const url = buildUrl(filters, limit, page);
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+	} = useInfiniteQuery({
+		queryKey: ["products", filters, limit],
+		initialPageParam: 1,
+		queryFn: async ({ pageParam }) => {
+			const url = buildUrl(filters, limit, pageParam);
 			const res = await axios.get(url, {
 				headers: { Accept: "application/json" },
 			});
-			if (res.status === 200) {
-				// Assuming the response shape is: { data: Product[] }
-				return res.data.data;
+			return res.data;
+		},
+		getNextPageParam: (lastPage, pages) => {
+			if (pages.length < lastPage.pagination.totalPages) {
+				return pages.length + 1;
 			}
-			throw new Error("Failed to get data");
+			return undefined;
 		},
 	});
 
+	// Intersection Observer to load next page
+	const { ref, inView } = useInView({ threshold: 0 });
+	useEffect(() => {
+		if (inView && hasNextPage && !isFetchingNextPage) {
+			fetchNextPage();
+		}
+	}, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
 	if (isLoading) {
 		return (
-			<div className="flex flex-col justify-center items-center h-screen">
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				className="flex flex-col justify-center items-center min-h-[500px]"
+			>
 				<Loading />
-			</div>
+			</motion.div>
 		);
 	}
 
 	if (isError) {
 		return (
-			<div className="flex flex-col justify-center items-center h-screen text-red-500">
-				Error: {error?.message || "Failed to fetch data"}
+			<div className="flex flex-col justify-center items-center min-h-[500px] text-red-500">
+				Error: {(error as AxiosError)?.message || "Failed to fetch data"}
 			</div>
 		);
 	}
 
-	if (!Array.isArray(products) || products.length === 0) {
+	// Flatten pages array
+	const products: Product[] = response
+		? response.pages.flatMap((page) => page.data)
+		: [];
+
+	if (!products || products.length === 0) {
 		return (
-			<div className="flex flex-col justify-center items-center h-screen">
+			<div className="flex flex-col justify-center items-center min-h-[500px]">
 				<Image
 					src={`/images/empty-folder.png`}
 					alt="Empty folder"
@@ -135,23 +163,59 @@ export default function CollectionPage() {
 	}
 
 	return (
-		<main className=" md:py-12 py-8">
+		<motion.main
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			className="md:py-12 py-8"
+		>
 			<Wrapper>
-				<div className="grid  grid-cols-2  md:grid-cols-3 lg:grid-cols-4 gap-4 ">
-					{products.map((product) => (
-						<div key={product._id}>
-							<ProductCard
-								title={product.title}
-								price={product.price}
-								images={product.images}
-								slug={product.slug}
-								colors={product.colors}
-								isNew={product.isNewItem}
-							/>
-						</div>
-					))}
-				</div>
+				<motion.section
+					initial={{ y: 20, opacity: 0 }}
+					animate={{ y: 0, opacity: 1 }}
+					transition={{ delay: 0.2 }}
+					className="md:py-5"
+				>
+					<FilterComponent />
+				</motion.section>
+
+				<AnimatePresence mode="wait">
+					<motion.div
+						initial={{ y: 20, opacity: 0 }}
+						animate={{ y: 0, opacity: 1 }}
+						transition={{ delay: 0.3 }}
+						className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+					>
+						{products.map((product, index) => (
+							<motion.div
+								key={product._id}
+								initial={{ opacity: 0, y: 20 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{ delay: index * 0.1 }}
+							>
+								<ProductCard
+									title={product.title}
+									price={product.price}
+									images={product.images}
+									slug={product.slug}
+									colors={product.colors}
+									isNew={product.isNewItem}
+								/>
+							</motion.div>
+						))}
+					</motion.div>
+				</AnimatePresence>
+
+				{/* Observer element with animation */}
+				<motion.div
+					ref={ref}
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{ delay: 0.5 }}
+					className="flex justify-center py-4"
+				>
+					{isFetchingNextPage && <Loading />}
+				</motion.div>
 			</Wrapper>
-		</main>
+		</motion.main>
 	);
 }

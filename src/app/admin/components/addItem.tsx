@@ -51,6 +51,7 @@ const productSchema = z
 		models: z.array(z.string()).min(1, "At least one model is required"),
 		tags: z.array(z.string()).min(1, "At least one tag is required"),
 		category: z.array(z.string()).min(1, "At least one category is required"),
+		featured: z.boolean().optional().default(false),
 		discount: z
 			.number()
 			.min(0, "Discount cannot be negative")
@@ -99,6 +100,7 @@ const initialValues: ProductFormData = {
 	colors: [],
 	models: [],
 	tags: [],
+	featured: false,
 	category: [],
 	discount: 0,
 };
@@ -215,7 +217,7 @@ export default function ProductForm() {
 						<section>
 							<h2 className="text-lg font-medium mb-4">Basic Information</h2>
 							<div className="space-y-6">
-								<div className="grid md:grid-cols-2 gap-6">
+								<div className="flex flex-wrap gap-6">
 									<FormInput
 										label="Title"
 										name="title"
@@ -246,6 +248,14 @@ export default function ProductForm() {
 											checked={data.isBestSeller}
 											onChange={(e) =>
 												handleFieldChange("isBestSeller", e.target.checked)
+											}
+										/>
+										<FormCheckbox
+											label="featured"
+											name="featured"
+											checked={data.featured}
+											onChange={(e) =>
+												handleFieldChange("featured", e.target.checked)
 											}
 										/>
 									</div>
