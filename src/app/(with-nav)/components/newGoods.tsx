@@ -6,7 +6,6 @@ import { Loader2, Sparkles } from "lucide-react";
 import ProductCard from "@/components/productCard";
 import Wrapper from "@/components/wrapper";
 import { Button } from "@/components/ui/button";
-import CountdownTimer from "@/components/countDown";
 import { GetIsOnSale } from "@/server/action";
 
 // Types
@@ -131,18 +130,6 @@ export default function Promotion() {
 						) : (
 							<>
 								{isError && <ErrorState />}
-								{upcomingSales.length > 0 && (
-									<motion.div variants={animations.item}>
-										<CountdownTimer
-											targetDate={upcomingSales[0].salesStartAt!}
-											onComplete={() =>
-												queryClient.invalidateQueries({
-													queryKey: ["isOnSale"],
-												})
-											}
-										/>
-									</motion.div>
-								)}
 								{!upcomingSales.length && (
 									<ProductGrid
 										products={activeProducts}

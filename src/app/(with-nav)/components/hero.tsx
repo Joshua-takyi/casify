@@ -70,7 +70,7 @@ export default function HeroSection() {
 				{/* Optimized background image using Next.js Image component */}
 				<div className="absolute inset-0">
 					<Image
-						src="/images/sunset.jpg"
+						src="/images/yellow.jpg"
 						alt="Background"
 						fill
 						priority // Preload the image
@@ -79,7 +79,7 @@ export default function HeroSection() {
 						sizes="100vw" // Image will always be viewport width
 					/>
 					{/* Overlay gradient */}
-					<div className="absolute inset-0 bg-slate-900/70" />
+					<div className="absolute inset-0 bg-slate-800/50" />
 				</div>
 
 				<Wrapper className="relative h-full">
@@ -111,7 +111,7 @@ export default function HeroSection() {
 								</h1>
 
 								{/* Description */}
-								<p className="text-base md:text-lg text-slate-300 leading-relaxed max-w-2xl">
+								<p className="text-base md:text-lg text-white leading-relaxed max-w-2xl">
 									{heroContent.description}
 								</p>
 							</motion.div>
@@ -136,19 +136,19 @@ export default function HeroSection() {
 								</motion.div>
 
 								{/* Stats with staggered animation */}
-								<div className="flex flex-wrap gap-6 text-sm text-slate-300">
+								<div className="flex flex-wrap gap-6 text-sm text-white">
 									{heroContent.stats.map((stat, index) => (
 										<motion.div
 											key={index}
 											variants={itemVariants}
 											className="flex items-center gap-2"
 										>
-											<stat.icon className="h-5 w-5 text-slate-400" />
+											<stat.icon className="h-5 w-5 text-yellow-400" />
 											<span>
 												<span className="block text-white font-medium">
 													{stat.value}
 												</span>
-												<span className="text-slate-400">{stat.label}</span>
+												<span className="text-white">{stat.label}</span>
 											</span>
 										</motion.div>
 									))}

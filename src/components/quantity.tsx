@@ -8,10 +8,10 @@ interface AddQuantityProps {
 }
 
 const AddQuantity: React.FC<AddQuantityProps> = ({
-	onQuantityChange,
-	max = 99,
+    onQuantityChange,
+    max = 99,
 }) => {
-	const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState(1);
 
 	useEffect(() => {
 		onQuantityChange(quantity);

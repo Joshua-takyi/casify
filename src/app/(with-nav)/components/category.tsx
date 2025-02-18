@@ -4,7 +4,6 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Wrapper from "@/components/wrapper";
-import { motion } from "framer-motion";
 
 const categoryData = [
 	{
@@ -51,98 +50,55 @@ const categoryData = [
 	},
 ];
 
-const containerVariants = {
-	hidden: { opacity: 0 },
-	visible: {
-		opacity: 1,
-		transition: {
-			staggerChildren: 0.1,
-		},
-	},
-};
-
-const itemVariants = {
-	hidden: { opacity: 0, y: 20 },
-	visible: {
-		opacity: 1,
-		y: 0,
-		transition: { duration: 0.5 },
-	},
-};
-
 const Category: React.FC = () => {
 	return (
-		<section className="py-16 md:py-24">
+		<section className="py-12 md:py-16">
 			<Wrapper>
-				<motion.div
-					initial="hidden"
-					whileInView="visible"
-					viewport={{ once: true, margin: "-100px" }}
-					variants={containerVariants}
-					className="space-y-12"
-				>
-					<div className="text-center space-y-4">
-						<motion.h2
-							variants={itemVariants}
-							className="text-3xl md:text-4xl font-bold text-gray-900"
-						>
+				<div className="space-y-8">
+					<div className="text-center space-y-2">
+						<h2 className="text-2xl md:text-3xl font-bold text-gray-900">
 							Browse Categories
-						</motion.h2>
-						<motion.p
-							variants={itemVariants}
-							className="text-gray-600 max-w-2xl mx-auto"
-						>
+						</h2>
+						<p className="text-gray-600 text-sm md:text-base">
 							Discover our curated collection of premium accessories
-						</motion.p>
+						</p>
 					</div>
 
-					<motion.div
-						variants={containerVariants}
-						className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6"
-					>
+					<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
 						{categoryData.map((item) => (
-							<motion.div key={item.id} variants={itemVariants}>
-								<Link href={item.path} className="group block h-full">
-									<div
-										className="relative h-full bg-white rounded-2xl p-6 transition-all duration-300
-                              hover:shadow-lg hover:shadow-gray-200/50 border border-gray-100"
-									>
-										<div className="space-y-4">
-											<div className="relative w-16 h-16 mx-auto">
-												<div
-													className="absolute inset-0 bg-indigo-50 rounded-xl transform 
-                                    rotate-6 transition-transform group-hover:rotate-12"
-												/>
-												<div className="absolute inset-0 flex items-center justify-center">
-													<Image
-														src={item.image}
-														alt={item.name}
-														width={40}
-														height={40}
-														className="object-contain transform transition-transform 
-                                     group-hover:scale-110 duration-300"
-													/>
-												</div>
-											</div>
-
-											<div className="text-center space-y-1">
-												<h3
-													className="font-medium text-gray-900 group-hover:text-indigo-600 
-                                   transition-colors duration-300"
-												>
-													{item.name}
-												</h3>
-												<p className="text-xs text-gray-500 hidden sm:block">
-													{item.description}
-												</p>
-											</div>
-										</div>
+							<Link
+								href={item.path}
+								key={item.id}
+								className="group block bg-white rounded-lg p-4 border border-gray-100 
+                                 hover:shadow-sm transition-shadow duration-200"
+							>
+								<div className="space-y-3">
+									<div className="relative w-12 h-12 mx-auto">
+										<Image
+											src={item.image}
+											alt={item.name}
+											fill
+											className="object-contain transition-transform duration-200 
+                                             group-hover:scale-105"
+										/>
 									</div>
-								</Link>
-							</motion.div>
+
+									<div className="text-center">
+										<h3
+											className="font-medium text-sm text-gray-900 group-hover:text-indigo-600 
+                                         transition-colors duration-200"
+										>
+											{item.name}
+										</h3>
+										<p className="text-xs text-gray-500 hidden sm:block mt-1">
+											{item.description}
+										</p>
+									</div>
+								</div>
+							</Link>
 						))}
-					</motion.div>
-				</motion.div>
+					</div>
+				</div>
 			</Wrapper>
 		</section>
 	);

@@ -137,7 +137,7 @@
 	}
 	h1 {
 		@container (width >= 42.6rem) {
-			font-size: clamp(3rem, 5vw, 6rem);
+			font-size: clamp(3rem, 6vw, 6rem);
 		}
 
 		@container (width <= 42.6rem) {

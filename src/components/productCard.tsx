@@ -61,7 +61,7 @@ const ProductCard = ({
 	return (
 		<Link
 			href={`/product/${slug}`}
-			className="group relative block w-full bg-transparent"
+			className="group relative block w-full bg-transparent border"
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>

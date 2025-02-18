@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 export const ImageCarousel = ({ images = [], alt = "" }) => {
 	const [activeIndex, setActiveIndex] = useState(0);
@@ -66,9 +65,9 @@ export const ImageCarousel = ({ images = [], alt = "" }) => {
 	}
 
 	return (
-		<div className="flex flex-col items-center w-full h-full space-y-4 ">
+		<div className="flex flex-col items-center w-full h-full space-y-6">
 			{/* Main Image Container */}
-			<div className="relative w-full h-[330px] md:h-[430px] lg:h-[530px]  overflow-hidden group ">
+			<div className="relative w-full h-[330px] md:h-[430px] lg:h-[530px] overflow-hidden">
 				<AnimatePresence initial={false} custom={direction}>
 					<motion.div
 						key={activeIndex}
@@ -101,61 +100,51 @@ export const ImageCarousel = ({ images = [], alt = "" }) => {
 							sizes="(max-width: 768px) 100vw, (max-width: 1280px) 90vw, 80vw"
 							className="object-contain"
 							priority={true}
-							quality={90}
+							quality={100}
 						/>
 					</motion.div>
 				</AnimatePresence>
-
-				{/* Navigation Buttons */}
-				<motion.button
-					whileHover={{ scale: 1.1 }}
-					whileTap={{ scale: 0.9 }}
-					onClick={() => paginate(-1)}
-					className="absolute left-2 top-1/2 -translate-y-1/2 h-12 w-12 md:opacity-0 md:group-hover:opacity-100 flex items-center justify-center z-10 bg-white/80 hover:bg-white shadow-xs transition-all duration-300 border border-gray-200"
-				>
-					<ChevronLeftIcon className="w-6 h-6 text-gray-700" />
-				</motion.button>
-				<motion.button
-					whileHover={{ scale: 1.1 }}
-					whileTap={{ scale: 0.9 }}
-					onClick={() => paginate(1)}
-					className="absolute right-2 top-1/2 -translate-y-1/2 h-12 w-12 md:opacity-0 md:group-hover:opacity-100 flex items-center justify-center z-10 bg-white/80 hover:bg-white shadow-xs  transition-all duration-300  border border-gray-200"
-				>
-					<ChevronRightIcon className="w-6 h-6 text-gray-700" />
-				</motion.button>
 			</div>
 
 			{/* Thumbnails */}
-			<div className="flex gap-2 overflow-x-auto max-w-full py-2 px-4 scrollbar-hide snap-x">
-				{images.map((image, index) => (
-					<motion.button
-						key={index}
-						whileHover={{ scale: 1.05 }}
-						whileTap={{ scale: 0.95 }}
-						onClick={() => {
-							setDirection(index > activeIndex ? 1 : -1);
-							setActiveIndex(index);
-						}}
-						className={`relative flex-shrink-0 rounded-lg overflow-hidden  snap-start border-1  transition-all duration-200
-                            ${
-															activeIndex === index
-																? "border-blue-500 opacity-100"
-																: "border-gray-200 opacity-60 hover:opacity-80"
-														}`}
-						aria-label={`View image ${index + 1}`}
-						aria-current={activeIndex === index ? "true" : "false"}
-					>
-						<div className="relative w-16 h-16 sm:w-20 sm:h-20">
-							<Image
-								src={image}
-								fill
-								alt={`Thumbnail ${index + 1}`}
-								className="object-cover"
-								sizes="(max-width: 640px) 64px, 80px"
+			<div className="flex items-center justify-center w-full max-w-full overflow-x-auto overflow-y-hidden scrollbar-hide">
+				<div className="flex gap-4 px-4 mx-auto">
+					{images.map((image, index) => (
+						<div key={index} className="relative flex-shrink-0">
+							<motion.button
+								whileHover={{ scale: 1.05 }}
+								whileTap={{ scale: 0.95 }}
+								onClick={() => {
+									setDirection(index > activeIndex ? 1 : -1);
+									setActiveIndex(index);
+								}}
+								className="relative w-16 h-16 sm:w-20 sm:h-20"
+								aria-label={`View image ${index + 1}`}
+								aria-current={activeIndex === index ? "true" : "false"}
+							>
+								<Image
+									src={image}
+									fill
+									alt={`Thumbnail ${index + 1}`}
+									className="object-cover"
+									sizes="(max-width: 640px) 64px, 80px"
+								/>
+							</motion.button>
+							<motion.div
+								initial={false}
+								animate={{
+									opacity: activeIndex === index ? 1 : 0,
+									scale: activeIndex === index ? 1 : 0.8,
+								}}
+								transition={{
+									duration: 0.3,
+									ease: "easeInOut",
+								}}
+								className="absolute -bottom-2 left-0 w-full h-0.5 bg-black"
 							/>
 						</div>
-					</motion.button>
-				))}
+					))}
+				</div>
 			</div>
 		</div>
 	);
