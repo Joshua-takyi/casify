@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn, signOut } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 import { ProductPropsForDb } from "@/types/products";
 import { SignInProps } from "@/types/user";
 import axios, { AxiosError } from "axios";
@@ -389,6 +389,115 @@ export async function GetFeatured() {
 		return {
 			success: false,
 			message: errorMessage,
+		};
+	}
+}
+export async function GetOrders() {
+	try {
+		// Get the session token if you're using one
+		const session = await auth();
+
+		const response = await axios.get(`${API_URL}/get-order`, {
+			withCredentials: true,
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${session?.user?.accessToken}`, // If you're using JWT
+				// Or whatever auth header your API expects
+			},
+		});
+		return response.data.data;
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			throw new Error(
+				error.response?.data?.message || "Failed to retrieve orders"
+			);
+		}
+		throw new Error("Unable to retrieve orders");
+	}
+}
+
+interface GetByProps {
+	category: string;
+	limit: number;
+	tags?: string;
+}
+export async function GetBy({ category, limit, tags = "" }: GetByProps) {
+	try {
+		const res = await axios.get(`${API_URL}/products/get-item`, {
+			params: { category, limit, tags },
+		});
+
+		if (res.status === 200) {
+			return {
+				success: true,
+				message: "Data fetched successfully",
+				data: res.data.data,
+			};
+		}
+
+		throw new Error("Failed to get data");
+	} catch (error) {
+		if (axios.isAxiosError(error)) {
+			return {
+				success: false,
+				message: error.response?.data.message || "Failed to get data",
+			};
+		}
+
+		return {
+			success: false,
+			message: "Failed to get data",
+		};
+	}
+}
+
+export async function GetSimilarProducts({ slug }: { slug: string }) {
+	if (!slug || slug === "undefined") {
+		console.error("GetSimilarProducts called with invalid slug:", slug);
+		return {
+			success: false,
+			message: "Slug is required",
+			data: [],
+		};
+	}
+
+	try {
+		// Ensure the slug is properly encoded for the URL
+		const encodedSlug = encodeURIComponent(slug);
+		console.log(`Encoded slug: ${encodedSlug}`);
+
+		const url = `${API_URL}/products/get-similar-items/${encodedSlug}`;
+		console.log(`Making request to: ${url}`);
+
+		const res = await axios.get(url);
+
+		// Check if the response has the expected structure
+		if (res.data && res.data.data) {
+			return {
+				success: true,
+				data: res.data.data,
+				message: "Data fetched successfully",
+			};
+		}
+
+		return {
+			success: true,
+			data: res.data || [], // Fallback to empty array if no data
+			message: "Data fetched successfully",
+		};
+	} catch (error) {
+		console.error("Error in GetSimilarProducts:", error);
+		if (axios.isAxiosError(error)) {
+			return {
+				success: false,
+				message: error.response?.data?.message || "Failed to get data",
+				data: [],
+			};
+		}
+		return {
+			success: false,
+			message: "Unknown error occurred",
+			data: [],
 		};
 	}
 }

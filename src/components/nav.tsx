@@ -4,12 +4,12 @@ import SearchComponent from "@/components/search";
 import Link from "next/link";
 import CartSheet from "@/components/cartComponent";
 import AccountDropdown from "./dropdown";
-import AnnouncementBar from "./announcementBar";
+// import AnnouncementBar from "./announcementBar";
 
 export default function Nav() {
 	return (
 		<div className="sticky top-0 z-50">
-			<AnnouncementBar />
+			{/* <AnnouncementBar /> */}
 			<nav className="bg-white border-b border-gray-200">
 				<Wrapper className="w-full flex justify-between items-center py-4 px-4 md:px-6">
 					<Link

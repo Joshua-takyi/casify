@@ -75,8 +75,7 @@ const AddToCartButton = ({
 
 	return (
 		<button
-			className="w-full py-4 px-6 rounded-lg bg-gray-900 text-white font-medium 
-                    hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed
+			className="w-full py-4 px-6 rounded-lg  rounded-l-lg bg-gray-50 border border-gray-300 text-black hover:bg-gray-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
                     flex items-center justify-center gap-2"
 			onClick={handleAddToCart}
 			disabled={isPending || !selectedColor || !selectedModel}

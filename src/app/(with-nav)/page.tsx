@@ -1,15 +1,25 @@
 import HeroSection from "@/app/(with-nav)/components/hero";
 import Category from "@/app/(with-nav)/components/category";
-import Promotion from "./components/newGoods";
 import FeaturedProducts from "./components/featuredProducts";
+import Testimonials from "./components/testimonials";
+import BudCases from "./components/airpodCases";
+import PowerSection from "./components/power";
+import { StrapsSection } from "./components/straps";
+import IphoneCaseSection from "./components/iphoneCases";
+import GalaxyCaseSection from "./components/galaxyCases";
 
 export default function HomePage() {
 	return (
-		<main className="@container space-y-16">
+		<main>
 			<HeroSection />
 			<Category />
-			<Promotion />
 			<FeaturedProducts />
+			<IphoneCaseSection />
+			<GalaxyCaseSection />
+			<BudCases />
+			<StrapsSection />
+			<PowerSection />
+			<Testimonials />
 		</main>
 	);
 }

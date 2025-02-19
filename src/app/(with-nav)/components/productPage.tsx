@@ -14,6 +14,7 @@ import AddToCart from "@/components/addToCart";
 import AddQuantity from "@/components/quantity";
 import { BoltIcon, ShoppingBagIcon } from "@heroicons/react/24/outline";
 import Accordion from "@/components/accordion";
+import SimilarProducts from "@/components/similarProducts";
 
 export default function Product() {
 	const [quantity, setQuantity] = useState<number>(1);
@@ -135,10 +136,7 @@ export default function Product() {
 												setSelectedColor={setSelectedColor}
 											/>
 										</div>
-										<div className="flex flex-col gap-2">
-											<span className="text-sm font-medium text-gray-700">
-												Quantity
-											</span>
+										<div>
 											<AddQuantity onQuantityChange={handleQuantityChange} />
 										</div>
 									</div>
@@ -180,7 +178,7 @@ export default function Product() {
 					</div>
 				</div>
 
-				<section className="md:py-20 py-8 flex flex-col md:gap-10 gap-5">
+				<section className="py-8 flex flex-col md:gap-10 gap-5">
 					<Accordion
 						mainHeader="Product Information"
 						items={[
@@ -273,6 +271,9 @@ export default function Product() {
 							},
 						]}
 					/>
+				</section>
+				<section className="px-4 sm:px-6 md:px-8 lg:px-24">
+					<SimilarProducts slug={slug} />
 				</section>
 			</Wrapper>
 		</main>

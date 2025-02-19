@@ -1,5 +1,4 @@
 "use client";
-import { Checkbox } from "@/components/ui/checkbox";
 
 interface FormCheckProps {
 	label: string;
@@ -16,31 +15,64 @@ export const FormCheckbox = ({
 	onChange,
 	error,
 }: FormCheckProps) => {
-	const handleChange = (checked: boolean) => {
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		onChange({
 			target: {
 				name,
-				checked,
+				checked: e.target.checked,
 			},
 		});
 	};
 
 	return (
-		<div className="flex items-center gap-3 p-2">
-			<Checkbox
+		<div
+			style={{
+				display: "flex",
+				alignItems: "center",
+				gap: "0.75rem",
+				padding: "0.5rem",
+				position: "relative",
+			}}
+		>
+			<input
+				type="checkbox"
 				id={name}
+				name={name}
 				checked={checked}
-				onCheckedChange={handleChange}
-				className="w-5 h-5"
+				onChange={handleChange}
+				style={{
+					width: "1.25rem",
+					height: "1.25rem",
+					cursor: "pointer",
+					accentColor: "#000",
+				}}
 				aria-invalid={!!error}
 			/>
 			<label
 				htmlFor={name}
-				className="text-sm font-medium text-gray-700 cursor-pointer"
+				style={{
+					fontSize: "0.875rem",
+					fontWeight: "500",
+					color: "#374151",
+					cursor: "pointer",
+				}}
 			>
 				{label}
 			</label>
-			{error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+			{error && (
+				<p
+					style={{
+						color: "#dc2626",
+						fontSize: "0.75rem",
+						marginTop: "0.25rem",
+						position: "absolute",
+						bottom: "-1.25rem",
+						left: "0.5rem",
+					}}
+				>
+					{error}
+				</p>
+			)}
 		</div>
 	);
 };

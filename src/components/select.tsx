@@ -1,15 +1,6 @@
 "use client";
 
 import { Tag, X } from "lucide-react";
-import {
-	Select,
-	SelectTrigger,
-	SelectValue,
-	SelectContent,
-	SelectItem,
-	SelectLabel,
-	SelectGroup,
-} from "@/components/ui/select";
 
 interface SelectProps {
 	options: Array<{
@@ -41,6 +32,17 @@ export const FormSelect = ({
 	required,
 	error,
 }: SelectProps) => {
+	const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+		const selectedValue = event.target.value;
+		if (isMulti) {
+			if (Array.isArray(value) && !value.includes(selectedValue)) {
+				onChange([...value, selectedValue]);
+			}
+		} else {
+			onChange(selectedValue);
+		}
+	};
+
 	const handleRemoveItem = (itemValue: string) => {
 		if (isMulti) {
 			const updatedValue = Array.isArray(value)
@@ -70,6 +72,21 @@ export const FormSelect = ({
 		return valueStr;
 	};
 
+	// Flatten options and subcategories into a single array with proper indentation
+	const flattenedOptions = options.flatMap((group) => [
+		// Group label as disabled option
+		{ value: group.label, label: group.label, disabled: true, isGroup: true },
+		// Main items
+		...group.items.flatMap((item) => [
+			{ value: item.value, label: item.label },
+			// Subcategories with indentation
+			...(item.subcategories?.map((sub) => ({
+				value: sub.value,
+				label: `\u00A0\u00A0\u00A0\u00A0${sub.label}`,
+			})) || []),
+		]),
+	]);
+
 	return (
 		<div className="space-y-2">
 			{label && (
@@ -77,6 +94,7 @@ export const FormSelect = ({
 					{label} {required && <span className="text-red-500">*</span>}
 				</label>
 			)}
+
 			{error && <p className="text-red-500 text-sm">{error}</p>}
 
 			{isMulti && Array.isArray(value) && value.length > 0 && (
@@ -103,15 +121,13 @@ export const FormSelect = ({
 				</div>
 			)}
 
-			{!isMulti && value && (
+			{!isMulti && value && typeof value === "string" && (
 				<div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-2 rounded-md mb-3">
 					<Tag size={16} />
-					<span className="text-sm font-medium">{findLabel(value)} </span>
+					<span className="text-sm font-medium">{findLabel(value)}</span>
 					<button
 						type="button"
-						onClick={() =>
-							handleRemoveItem(Array.isArray(value) ? value[0] : value)
-						}
+						onClick={() => handleRemoveItem(value)}
 						className="hover:bg-blue-100 rounded-full p-1"
 						aria-label={`Remove ${findLabel(value)}`}
 					>
@@ -120,61 +136,36 @@ export const FormSelect = ({
 				</div>
 			)}
 
-			<Select
-				onValueChange={(selectedValue) => {
-					if (isMulti) {
-						// For multi-select, add the selected value to the array
-						if (Array.isArray(value) && !value.includes(selectedValue)) {
-							onChange([...value, selectedValue]);
-						}
-					} else {
-						// For single-select, return an array with the selected value
-						onChange([selectedValue]);
-					}
-				}}
-				value={isMulti ? "" : value?.[0] || ""} // Use the first item for single-select
+			<select
+				className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+          ${className || ""}`}
+				onChange={handleChange}
+				value={isMulti ? "" : (Array.isArray(value) ? value[0] : value) || ""}
 			>
-				<SelectTrigger className={className}>
-					<SelectValue
-						placeholder={
-							isMulti
-								? Array.isArray(value) && value.length > 0
-									? `${value.length} selected`
-									: placeholder
-								: value?.[0] || placeholder
+				<option value="" disabled>
+					{isMulti
+						? Array.isArray(value) && value.length > 0
+							? `${value.length} selected`
+							: placeholder
+						: placeholder}
+				</option>
+
+				{flattenedOptions.map((option, index) => (
+					<option
+						key={`${option.value}-${index}`}
+						value={option.value}
+						disabled={"disabled" in option ? option.disabled : false}
+						className={
+							"isGroup" in option && option.isGroup
+								? "font-bold bg-gray-100"
+								: ""
 						}
-					/>
-				</SelectTrigger>
-				<SelectContent>
-					{options.map((group) => (
-						<SelectGroup key={group.label}>
-							<SelectLabel className="font-bold text-sm text-gray-700">
-								{group.label}
-							</SelectLabel>
-							{group.items.map((item) => (
-								<div key={item.value}>
-									<SelectItem
-										value={item.value}
-										className="hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition-colors duration-150"
-									>
-										{item.label}
-									</SelectItem>
-									{item.subcategories &&
-										item.subcategories.map((subcategory) => (
-											<SelectItem
-												key={subcategory.value}
-												value={subcategory.value}
-												className="pl-8 hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition-colors duration-150"
-											>
-												{subcategory.label}
-											</SelectItem>
-										))}
-								</div>
-							))}
-						</SelectGroup>
-					))}
-				</SelectContent>
-			</Select>
+					>
+						{option.label}
+					</option>
+				))}
+			</select>
 		</div>
 	);
 };

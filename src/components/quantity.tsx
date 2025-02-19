@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Minus, Plus } from "lucide-react";
 
 interface AddQuantityProps {
 	onQuantityChange: (quantity: number) => void;
@@ -8,10 +7,10 @@ interface AddQuantityProps {
 }
 
 const AddQuantity: React.FC<AddQuantityProps> = ({
-    onQuantityChange,
-    max = 99,
+	onQuantityChange,
+	max = 99,
 }) => {
-    const [quantity, setQuantity] = useState(1);
+	const [quantity, setQuantity] = useState(1);
 
 	useEffect(() => {
 		onQuantityChange(quantity);
@@ -39,33 +38,34 @@ const AddQuantity: React.FC<AddQuantityProps> = ({
 	};
 
 	return (
-		<div className="flex items-center justify-between w-full  h-10 border border-gray-300 rounded-md">
-			<button
-				onClick={handleDecrement}
-				disabled={quantity <= 1}
-				className="flex items-center justify-center w-8 md:w-10 h-full text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-				aria-label="Decrease quantity"
-			>
-				<Minus size={16} />
-			</button>
-
-			<input
-				type="number"
-				value={quantity}
-				onChange={handleDirectInput}
-				className="w-12 h-full text-center text-gray-900 border-none focus:outline-none  bg-transparent"
-				min="1"
-				max={max}
-			/>
-
-			<button
-				onClick={handleIncrement}
-				disabled={quantity >= max}
-				className="flex items-center justify-center w-8 md:w-10 h-full text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-				aria-label="Increase quantity"
-			>
-				<Plus size={16} />
-			</button>
+		<div className="flex flex-col gap-2">
+			<span className="text-gray-600 text-sm">Quantity</span>
+			<div className="inline-flex items-center">
+				<button
+					onClick={handleDecrement}
+					disabled={quantity <= 1}
+					className="w-10 h-10 flex items-center justify-center rounded-l-lg bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+					aria-label="Decrease quantity"
+				>
+					−
+				</button>
+				<input
+					type="number"
+					value={quantity}
+					onChange={handleDirectInput}
+					className="w-14 h-10 text-center text-gray-900 bg-gray-50 border-y border-gray-200 [-moz-appearance:_textfield] [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none"
+					min="1"
+					max={max}
+				/>
+				<button
+					onClick={handleIncrement}
+					disabled={quantity >= max}
+					className="w-10 h-10 flex items-center justify-center rounded-r-lg bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+					aria-label="Increase quantity"
+				>
+					+
+				</button>
+			</div>
 		</div>
 	);
 };

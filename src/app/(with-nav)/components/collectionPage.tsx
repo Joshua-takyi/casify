@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export interface Product {
+export interface ProductCardProps {
 	_id: string;
 	title: string;
 	price: number;
@@ -143,7 +143,7 @@ export default function CollectionPage() {
 	}
 
 	// Flatten pages array
-	const products: Product[] = response
+	const products: ProductCardProps[] = response
 		? response.pages.flatMap((page) => page.data)
 		: [];
 
@@ -193,6 +193,7 @@ export default function CollectionPage() {
 								transition={{ delay: index * 0.1 }}
 							>
 								<ProductCard
+									className={`border`}
 									title={product.title}
 									price={product.price}
 									images={product.images}

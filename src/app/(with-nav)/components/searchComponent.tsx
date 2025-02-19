@@ -7,10 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Loading from "@/app/loading";
 import Wrapper from "@/components/wrapper";
-import { Product } from "@/app/(with-nav)/components/collectionPage";
 import ProductCard from "@/components/productCard";
 import NoResultsFound from "./emptySearch";
 import { motion, AnimatePresence } from "framer-motion";
+import { ProductProps } from "../types/productProps";
 
 // Define our primary color
 // const PRIMARY_COLOR = "#868b92";
@@ -174,7 +174,7 @@ export default function SearchCom() {
 								exit={{ opacity: 0, y: -20 }}
 								className="grid grid-cols-2 md:grid-cols-4 gap-4"
 							>
-								{products.map((product: Product, index: number) => (
+								{products.map((product: ProductProps, index: number) => (
 									<motion.div
 										key={product._id}
 										initial={{ opacity: 0, y: 20 }}

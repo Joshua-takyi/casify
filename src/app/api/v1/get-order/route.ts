@@ -10,16 +10,18 @@ export async function GET() {
 			await ConnectDb();
 		}
 
+		// Get the current session
 		const session = await auth();
 		const userId = session?.user?.id;
 		if (!userId) {
 			return NextResponse.json(
-				{ message: "userId is required" },
-				{ status: 400 }
+				{ message: "User must be logged in" },
+				{ status: 401 }
 			);
 		}
 
-		const orders = await OrderModel.find({ userId });
+		// Retrieve orders where the userId matches the one in session
+		const orders = await OrderModel.find({ userId: userId });
 		if (orders.length === 0) {
 			return NextResponse.json(
 				{ message: "User has no orders" },
@@ -30,25 +32,21 @@ export async function GET() {
 		// Group products based on productId, model, and color
 		const productMap = new Map();
 
-		// Keep track of shipping addresses
+		// Collect shipping addresses from each order
 		const shippingAddresses = orders.map((order) => order.shippingAddress);
 
 		orders
 			.flatMap((order) => order.products)
 			.forEach((product) => {
-				// Create a unique key based on product attributes
 				const key = `${product.productId.toString()}-${product.model}-${
 					product.color
 				}`;
-
 				const existingProduct = productMap.get(key);
 
 				if (existingProduct) {
-					// If product already exists, increase quantity and update total price
 					existingProduct.quantity += product.quantity;
 					existingProduct.totalPrice += product.price * product.quantity;
 				} else {
-					// Otherwise, add the product with total price calculation
 					productMap.set(key, {
 						productId: product.productId,
 						name: product.name,
@@ -56,8 +54,8 @@ export async function GET() {
 						model: product.model,
 						image: product.image,
 						quantity: product.quantity,
-						price: product.price, // Unit price
-						totalPrice: product.price * product.quantity, // Total price
+						price: product.price,
+						totalPrice: product.price * product.quantity,
 					});
 				}
 			});
@@ -73,10 +71,13 @@ export async function GET() {
 
 		return NextResponse.json(
 			{
+				success: true,
 				message: "Orders retrieved successfully",
-				totalAmount,
-				products: uniqueProducts, // Optimized product list
-				shippingAddresses, // Array of all shipping addresses from orders
+				data: {
+					products: uniqueProducts,
+					shippingAddresses: shippingAddresses,
+					totalAmount: totalAmount,
+				},
 			},
 			{ status: 200 }
 		);

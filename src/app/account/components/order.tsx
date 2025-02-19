@@ -3,11 +3,12 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Wrapper from "@/components/wrapper";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { Smartphone, Package, MapPin } from "lucide-react";
+import { Smartphone, Package, Clock, Truck } from "lucide-react";
 import Loading from "@/app/loading";
+import { motion } from "framer-motion";
 import { Metadata } from "next";
 import Head from "next/head";
 
@@ -57,108 +58,108 @@ const formatCurrency = (amount: number) => {
 	}).format(amount);
 };
 
-const ProductCard: React.FC<{
+const ProductCard = ({
+	product,
+	shippingAddress,
+}: {
 	product: Product;
 	shippingAddress: ShippingAddress;
-}> = ({ product, shippingAddress }) => (
-	<article className="border-none shadow-sm hover:shadow-md transition-shadow duration-200">
-		<Card>
-			<CardContent className="p-4 md:p-6">
-				<div className="flex flex-col gap-6 lg:flex-row">
-					{/* Product Image with proper alt text */}
-					<div className="relative w-full h-40 md:w-48 md:h-48 lg:flex-shrink-0 overflow-hidden rounded-lg bg-gray-50">
-						<Image
-							src={product.image}
-							alt={`${product.name} for ${product.model} in ${product.color}`}
-							fill
-							className="object-contain"
-							priority
-						/>
+}) => (
+	<motion.article
+		initial={{ opacity: 0, y: 20 }}
+		animate={{ opacity: 1, y: 0 }}
+		transition={{ duration: 0.3 }}
+		className="overflow-hidden bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+	>
+		<div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+			{/* Product Image Section */}
+			<div className="lg:col-span-3 aspect-square relative bg-gray-50">
+				<Image
+					src={product.image}
+					alt={`${product.name} for ${product.model}`}
+					fill
+					className="object-contain p-4"
+					sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+					priority
+				/>
+			</div>
+
+			{/* Product Details Section */}
+			<div className="lg:col-span-6 p-6 lg:p-8 space-y-6">
+				<div className="space-y-4">
+					<div className="flex items-start justify-between">
+						<h2 className="text-xl font-semibold text-gray-900">
+							{product.name}
+						</h2>
+						<Badge
+							variant="secondary"
+							className="bg-blue-50 text-blue-700 px-3 py-1"
+						>
+							{product.quantity} {product.quantity === 1 ? "item" : "items"}
+						</Badge>
 					</div>
 
-					{/* Product Details & Shipping */}
-					<div className="flex flex-col w-full gap-6">
-						{/* Product Information */}
-						<div className="space-y-4">
-							<div className="space-y-2">
-								<div className="flex items-center justify-between flex-wrap">
-									<h2 className="font-medium text-gray-900">{product.name}</h2>
-									<Badge
-										variant="secondary"
-										className="font-normal bg-blue-100 text-blue-700"
-									>
-										Quantity: {product.quantity}
-									</Badge>
-								</div>
-
-								<dl className="space-y-2 text-sm text-gray-600">
-									<div className="flex items-center gap-2">
-										<dt className="flex items-center">
-											<Smartphone
-												className="h-4 w-4 text-blue-500"
-												aria-hidden="true"
-											/>
-											<span className="sr-only">Device Model:</span>
-										</dt>
-										<dd>{product.model}</dd>
-									</div>
-									<div className="flex items-center gap-2">
-										<dt className="flex items-center">
-											<Package
-												className="h-4 w-4 text-green-500"
-												aria-hidden="true"
-											/>
-											<span className="sr-only">Unit Price:</span>
-										</dt>
-										<dd>{formatCurrency(product.price)} per item</dd>
-									</div>
-								</dl>
-							</div>
-
-							<div className="flex items-center justify-between pt-4">
-								<div className="flex items-center gap-2">
-									<div
-										className="h-4 w-4 rounded-full border border-gray-200"
-										style={{ backgroundColor: product.color }}
-										aria-label={`Product color: ${product.color}`}
-									/>
-									<span className="text-sm text-gray-600">Color Selection</span>
-								</div>
-								<span className="font-medium text-gray-900">
-									Total: {formatCurrency(product.totalPrice)}
-								</span>
-							</div>
+					<div className="grid grid-cols-2 gap-4 text-sm">
+						<div className="flex items-center gap-2">
+							<Smartphone className="h-4 w-4 text-blue-500" />
+							<span className="text-gray-600">{product.model}</span>
 						</div>
+						<div className="flex items-center gap-2">
+							<Package className="h-4 w-4 text-green-500" />
+							<span className="text-gray-600">
+								{formatCurrency(product.price)}
+							</span>
+						</div>
+						<div className="flex items-center gap-2">
+							<div
+								className="h-4 w-4 rounded-full border border-gray-200"
+								style={{ backgroundColor: product.color }}
+								aria-label={`Color: ${product.color}`}
+							/>
+							<span className="text-gray-600">Color Selection</span>
+						</div>
+						<div className="flex items-center gap-2">
+							<Clock className="h-4 w-4 text-orange-500" />
+							<span className="text-gray-600">1-2 business days</span>
+						</div>
+					</div>
 
-						{/* Shipping Address */}
-						<section className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 space-y-3">
-							<header className="flex items-center gap-2 text-indigo-700">
-								<MapPin className="h-5 w-5" aria-hidden="true" />
-								<h3 className="font-medium">Delivery Information</h3>
-							</header>
-							<address className="space-y-1 text-sm text-gray-600 not-italic">
-								<p className="font-medium text-gray-800">
-									{shippingAddress.street}
-								</p>
-								<p>
-									{shippingAddress.city}, {shippingAddress.region}
-								</p>
-								<p>{shippingAddress.country}</p>
-								<div className="flex items-center gap-2 mt-2 flex-wrap">
-									<Badge
-										variant="outline"
-										className="bg-white border-indigo-200 text-indigo-700"
-									>
-										Ghana Post GPS: {shippingAddress.ghanaPost}
-									</Badge>
-								</div>
-							</address>
-						</section>
+					<div className="pt-4 border-t">
+						<div className="flex items-center justify-between">
+							<span className="text-gray-600">Total Amount:</span>
+							<span className="text-lg font-semibold text-gray-900">
+								{formatCurrency(product.totalPrice)}
+							</span>
+						</div>
 					</div>
 				</div>
-			</CardContent>
-		</Card>
-	</article>
+			</div>
+
+			{/* Shipping Details Section */}
+			<div className="lg:col-span-3 bg-gradient-to-br from-gray-50 to-white p-6 lg:p-8 border-t lg:border-l lg:border-t-0">
+				<div className="space-y-4">
+					<div className="flex items-center gap-2 text-gray-900">
+						<Truck className="h-5 w-5 text-blue-500" />
+						<h3 className="font-semibold">Delivery Details</h3>
+					</div>
+
+					<address className="not-italic space-y-2 text-sm text-gray-600">
+						<p className="font-medium text-gray-900">
+							{shippingAddress.street}
+						</p>
+						<p>
+							{shippingAddress.city}, {shippingAddress.region}
+						</p>
+						<p>{shippingAddress.country}</p>
+					</address>
+
+					<Badge variant="outline" className="w-full justify-center text-xs">
+						GPS: {shippingAddress.ghanaPost}
+					</Badge>
+				</div>
+			</div>
+		</div>
+	</motion.article>
 );
 
 export default function OrderPage() {
@@ -167,7 +168,7 @@ export default function OrderPage() {
 		queryFn: async () => {
 			try {
 				const res = await axios.get(`${API_URL}/get-order`);
-				return res.data;
+				return res.data.data;
 			} catch (error) {
 				if (axios.isAxiosError(error)) {
 					throw new Error(

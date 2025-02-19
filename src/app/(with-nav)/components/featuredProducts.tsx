@@ -4,9 +4,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ProductCard from "@/components/productCard";
 import Wrapper from "@/components/wrapper";
 import Loading from "@/app/loading";
-import { ProductProps } from "./newGoods";
 import { GetFeatured } from "@/server/action";
 import { useEffect } from "react";
+import { ProductProps } from "../types/productProps";
 
 export default function FeaturedProducts() {
 	const queryClient = useQueryClient();
@@ -56,6 +56,7 @@ export default function FeaturedProducts() {
 							slug={product.slug}
 							colors={product.colors}
 							isNew={product.isNewItem}
+							className="border"
 						/>
 					))}
 				</div>

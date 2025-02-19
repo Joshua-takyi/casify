@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const ImageCarousel = ({ images = [], alt = "" }) => {
@@ -56,6 +56,46 @@ export const ImageCarousel = ({ images = [], alt = "" }) => {
 		return () => document.removeEventListener("keydown", handleKeyDown);
 	}, [handleKeyDown]);
 
+	const thumbnails = useMemo(
+		() =>
+			images.map((image, index) => (
+				<div key={index} className="relative flex-shrink-0">
+					<motion.button
+						whileHover={{ scale: 1.05 }}
+						whileTap={{ scale: 0.95 }}
+						onClick={() => {
+							setDirection(index > activeIndex ? 1 : -1);
+							setActiveIndex(index);
+						}}
+						className="relative w-16 h-16 sm:w-20 sm:h-20"
+						aria-label={`View image ${index + 1}`}
+						aria-current={activeIndex === index ? "true" : "false"}
+					>
+						<Image
+							src={image}
+							fill
+							alt={`Thumbnail ${index + 1}`}
+							className="object-cover rounded-md"
+							sizes="(max-width: 640px) 64px, 80px"
+						/>
+					</motion.button>
+					<motion.div
+						initial={false}
+						animate={{
+							opacity: activeIndex === index ? 1 : 0,
+							scale: activeIndex === index ? 1 : 0.8,
+						}}
+						transition={{
+							duration: 0.3,
+							ease: "easeInOut",
+						}}
+						className="absolute -bottom-2 left-0 w-full h-0.5 bg-black"
+					/>
+				</div>
+			)),
+		[images, activeIndex]
+	);
+
 	if (!images.length) {
 		return (
 			<div className="flex items-center justify-center h-64 rounded-lg border-2 border-gray-200">
@@ -66,7 +106,6 @@ export const ImageCarousel = ({ images = [], alt = "" }) => {
 
 	return (
 		<div className="flex flex-col items-center w-full h-full space-y-6">
-			{/* Main Image Container */}
 			<div className="relative w-full h-[330px] md:h-[430px] lg:h-[530px] overflow-hidden">
 				<AnimatePresence initial={false} custom={direction}>
 					<motion.div
@@ -85,6 +124,7 @@ export const ImageCarousel = ({ images = [], alt = "" }) => {
 						dragElastic={1}
 						onDragEnd={(e, { offset, velocity }) => {
 							const swipe = swipePower(offset.x, velocity.x);
+
 							if (swipe < -swipeConfidenceThreshold) {
 								paginate(1);
 							} else if (swipe > swipeConfidenceThreshold) {
@@ -106,45 +146,8 @@ export const ImageCarousel = ({ images = [], alt = "" }) => {
 				</AnimatePresence>
 			</div>
 
-			{/* Thumbnails */}
 			<div className="flex items-center justify-center w-full max-w-full overflow-x-auto overflow-y-hidden scrollbar-hide">
-				<div className="flex gap-4 px-4 mx-auto">
-					{images.map((image, index) => (
-						<div key={index} className="relative flex-shrink-0">
-							<motion.button
-								whileHover={{ scale: 1.05 }}
-								whileTap={{ scale: 0.95 }}
-								onClick={() => {
-									setDirection(index > activeIndex ? 1 : -1);
-									setActiveIndex(index);
-								}}
-								className="relative w-16 h-16 sm:w-20 sm:h-20"
-								aria-label={`View image ${index + 1}`}
-								aria-current={activeIndex === index ? "true" : "false"}
-							>
-								<Image
-									src={image}
-									fill
-									alt={`Thumbnail ${index + 1}`}
-									className="object-cover"
-									sizes="(max-width: 640px) 64px, 80px"
-								/>
-							</motion.button>
-							<motion.div
-								initial={false}
-								animate={{
-									opacity: activeIndex === index ? 1 : 0,
-									scale: activeIndex === index ? 1 : 0.8,
-								}}
-								transition={{
-									duration: 0.3,
-									ease: "easeInOut",
-								}}
-								className="absolute -bottom-2 left-0 w-full h-0.5 bg-black"
-							/>
-						</div>
-					))}
-				</div>
+				<div className="flex gap-4 px-4 mx-auto">{thumbnails}</div>
 			</div>
 		</div>
 	);

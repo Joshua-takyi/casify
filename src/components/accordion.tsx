@@ -31,7 +31,7 @@ const AccordionItem = ({
 				className="w-full py-4 flex justify-between items-center"
 				onClick={onToggle}
 			>
-				<span className="text-[1.3rem] font-semibold text-gray-900">
+				<span className="text-base md:text-lg lg:text-xl font-semibold text-gray-900/80">
 					{title}
 				</span>
 				<motion.div
@@ -50,7 +50,7 @@ const AccordionItem = ({
 						transition={{ duration: 0.2 }}
 						className="overflow-hidden"
 					>
-						<div className="pb-4 text-[0.8rem] font-medium text-gray-500">
+						<div className="pb-4 text-sm md:text-base text-gray-600 leading-relaxed">
 							{children}
 						</div>
 					</motion.div>
@@ -73,7 +73,7 @@ export default function Accordion({ mainHeader, items }: AccordionProps) {
 
 	return (
 		<div className="w-full px-4 sm:px-6 md:px-8 lg:px-24 mx-auto">
-			<h2 className="text-[2rem] font-semibold mb-4">{mainHeader}</h2>
+			<h2 className="text-2xl md:text-3xl  font-semibold mb-6">{mainHeader}</h2>
 			<div className="border-t border-gray-200">
 				{items.map((item, index) => (
 					<AccordionItem

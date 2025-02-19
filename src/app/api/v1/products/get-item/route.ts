@@ -24,37 +24,38 @@ export async function GET(req: NextRequest) {
 		const matchStage = BuildQuery(searchParams);
 		const sortStage = BuildSort({ sortBy, sortOrder });
 
-		// Perform aggregation to fetch data and total count
-		const [result] = await ProductModel.aggregate([
-			{ $match: matchStage }, // Apply filtering conditions (ENSURE INDEXES ARE USED!)
-			{
-				$facet: {
-					data: [
-						// Paginate and sort data
-						{ $sort: sortStage }, // (ENSURE INDEXES ARE USED!)
-						{ $skip: skip },
-						{ $limit: limit },
-					],
-					totalCount: [{ $count: "count" }], // Count total matching documents
-				},
-			},
+		// Use Promise.all to run queries concurrently
+		const [products, totalCount] = await Promise.all([
+			ProductModel.find(matchStage)
+				.sort(sortStage)
+				.skip(skip)
+				.limit(limit)
+				.lean()
+				.exec(),
+			ProductModel.countDocuments(matchStage),
 		]);
 
-		// Extract results and calculate pagination metadata
-		const products = result.data || [];
-		const total = result.totalCount[0]?.count || 0;
+		// Calculate pagination metadata
+		const total = totalCount;
 		const totalPages = Math.ceil(total / limit);
 
 		// Return the response with data and pagination metadata
-		return NextResponse.json({
-			data: products,
-			pagination: {
-				page,
-				limit,
-				total,
-				totalPages,
+		return NextResponse.json(
+			{
+				data: products,
+				pagination: {
+					page,
+					limit,
+					total,
+					totalPages,
+				},
 			},
-		});
+			{
+				headers: {
+					"Cache-Control": "public, max-age=60", // Cache for 60 seconds
+				},
+			}
+		);
 	} catch (error) {
 		// Log errors and return a 500 response
 		logger.error("Failed to fetch products", { error });

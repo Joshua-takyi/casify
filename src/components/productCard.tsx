@@ -26,6 +26,7 @@ export interface ProductCardProps {
 	colors?: string | string[];
 	model?: string;
 	isNew?: boolean;
+	className?: string;
 }
 
 // Updated ProductCard Component
@@ -36,6 +37,7 @@ const ProductCard = ({
 	slug,
 	colors = [],
 	model = "",
+	className,
 	isNew = false,
 }: ProductCardProps) => {
 	const [isHovered, setIsHovered] = useState(false);
@@ -61,12 +63,12 @@ const ProductCard = ({
 	return (
 		<Link
 			href={`/product/${slug}`}
-			className="group relative block w-full bg-transparent border"
+			className={`group relative block w-full bg-transparent  ${className}`}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>
 			<div className="relative">
-				<div className="relative aspect-[5/5] w-full overflow-hidden">
+				<div className="relative aspect-[4/4] w-full overflow-hidden">
 					<Image
 						src={imageArray[0]}
 						alt={title}

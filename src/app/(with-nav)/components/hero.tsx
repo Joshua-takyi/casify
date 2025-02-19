@@ -31,18 +31,19 @@ export default function HeroSection() {
 	// Hero content configuration
 	const heroContent = {
 		announcement: "Free Shipping in Ghana & West Africa!",
-		tagline: "Made in Ghana",
-		headline: "Protect Your Phone",
+		tagline: "Premium Phone Accessories",
+		headline: "Style & Protection for Your Device",
 		description:
-			"Durable, stylish cases for everyday use. Fast delivery and lifetime warranty.",
+			"Discover our curated collection of premium phone cases and accessories. We offer the best brands with fast delivery and excellent customer service.",
 		ctaText: "Shop Now",
 		ctaLink: "/collection?category=phone-cases&available=true&limit=20",
 		stats: [
 			{ value: "24h", label: "Fast Delivery", icon: Truck },
-			{ value: "4.9/5", label: "Reviews", icon: Sparkles },
-			{ value: "5Y", label: "Warranty", icon: Shield },
+			{ value: "4.9/5", label: "Customer Rating", icon: Sparkles },
+			{ value: "100%", label: "Authentic Products", icon: Shield },
 		],
-		achievements: "Award-winning. Trusted across Africa.",
+		achievements:
+			"Trusted retailer of premium phone accessories across West Africa.",
 	};
 
 	return (
@@ -111,7 +112,7 @@ export default function HeroSection() {
 								</h1>
 
 								{/* Description */}
-								<p className="text-base md:text-lg text-white leading-relaxed max-w-2xl">
+								<p className="text-base md:text-lg text-white leading-relaxed max-w-2xl capitalize">
 									{heroContent.description}
 								</p>
 							</motion.div>

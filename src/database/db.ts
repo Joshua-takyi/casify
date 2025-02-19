@@ -35,7 +35,6 @@ export const ColorData = [
 	{ id: 25, label: "White", value: "#FFFFFF", category: "basic" },
 ];
 
-
 export const SelectCategories = [
 	{
 		label: "Phone Cases & Covers",
@@ -447,6 +446,7 @@ export const SelectedTags = [
 			{ label: "Clear Cases", value: "clear-cases" },
 			{ label: "Leather Cases", value: "leather-cases" },
 			{ label: "Rugged Cases", value: "rugged-cases" },
+			{ label: "Phone Chargers", value: "chargers" },
 		],
 	},
 	{
