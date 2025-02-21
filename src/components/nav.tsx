@@ -4,6 +4,7 @@ import SearchComponent from "@/components/search";
 import Link from "next/link";
 import CartSheet from "@/components/cartComponent";
 import AccountDropdown from "./dropdown";
+import SignOutBtn from "@/app/(with-nav)/components/signOutBtn";
 // import AnnouncementBar from "./announcementBar";
 
 export default function Nav() {
@@ -50,6 +51,7 @@ export default function Nav() {
 						<AccountDropdown />
 						<SearchComponent />
 						<CartSheet />
+						<SignOutBtn />
 					</div>
 				</Wrapper>
 			</nav>

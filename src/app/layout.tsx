@@ -3,6 +3,7 @@ import "./globals.css";
 import QueryProvider from "@/providers/queryProviders";
 import { Toaster } from "sonner";
 import localFont from "next/font/local"; // Correct import
+import { SessionProvider } from "next-auth/react";
 
 // const apercuMono = localFont({ // Correct variable name
 // 	src: "../fonts/apercu-mono-pro-regular.woff2",
@@ -47,7 +48,9 @@ export default function RootLayout({
 					toastOptions={{ duration: 2000 }}
 					richColors={true}
 				/>
-				<QueryProvider>{children}</QueryProvider>
+				<QueryProvider>
+					<SessionProvider>{children}</SessionProvider>
+				</QueryProvider>
 			</body>
 		</html>
 	);
