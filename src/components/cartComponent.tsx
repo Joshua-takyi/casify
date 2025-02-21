@@ -125,14 +125,10 @@ const api = axios.create({
 	timeout: 10000,
 	headers: { "Content-Type": "application/json" },
 });
-
 api.interceptors.response.use(
 	(response) => response,
 	async (error: AxiosError) => {
-		if (error.response?.status === 401) {
-			window.location.href = "/auth/sign-in";
-			return Promise.reject(error);
-		}
+		// Only handle rate limiting errors
 		if (error.response?.status === 429) {
 			const retryAfter = error.response.headers["retry-after"] || 2;
 			await new Promise((resolve) =>
@@ -337,7 +333,7 @@ const CartSheet: React.FC = () => {
 	const {
 		data: cartData,
 		isLoading: isCartLoading,
-		error: cartError,
+		// error: cartError,
 		refetch,
 	} = useQuery<{ data: CartData }>({
 		queryKey: ["cartData"],
@@ -539,20 +535,20 @@ const CartSheet: React.FC = () => {
 	/*     Render Component  */
 	/* --------------------- */
 
-	if (cartError) {
-		return (
-			<Alert variant="destructive">
-				<AlertCircle className="h-4 w-4" />
-				<AlertDescription>
-					Failed to load cart. Please refresh the page.
-				</AlertDescription>
-			</Alert>
-		);
-	}
+	// if (cartError) {
+	// 	return (
+	// 		<Alert variant="destructive">
+	// 			<AlertCircle className="h-4 w-4" />
+	// 			<AlertDescription>
+	// 				Failed to load cart. Please refresh the page.
+	// 			</AlertDescription>
+	// 		</Alert>
+	// 	);
+	// }
 
 	return (
 		<>
-			<div className="relative">
+			<div className="relative cursor-pointer" title="cart">
 				<Button
 					variant="ghost"
 					size="icon"

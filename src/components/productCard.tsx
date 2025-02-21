@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
 // Helper Functions
 const formatPrice = (price: number, currency = "GHS"): string => {
@@ -14,7 +14,7 @@ const formatPrice = (price: number, currency = "GHS"): string => {
 };
 
 const formatName = (title: string): string => {
-	return title.length > 20 ? `${title.slice(0, 20)}...` : title;
+	return title.length > 20 ? `${title.slice(0, 25)}...` : title;
 };
 
 // Props Interface
@@ -35,30 +35,30 @@ const ProductCard = ({
 	price,
 	images,
 	slug,
-	colors = [],
-	model = "",
+	// colors = [],
+	// model = "",
 	className,
 	isNew = false,
 }: ProductCardProps) => {
 	const [isHovered, setIsHovered] = useState(false);
 	const imageArray = Array.isArray(images) ? images : [images];
-	const colorArray = Array.isArray(colors) ? colors : colors ? [colors] : [];
-	const router = useRouter();
+	// const colorArray = Array.isArray(colors) ? colors : colors ? [colors] : [];
+	// const router = useRouter();
 
 	// Function to generate a URL for a given color and model
-	const getColorLink = (color: string): string => {
-		const params = new URLSearchParams();
-		if (color) params.append("color", color);
-		if (model) params.append("model", model);
-		return `/product/get-item/${slug}?${params.toString()}`;
-	};
+	// const getColorLink = (color: string): string => {
+	// 	const params = new URLSearchParams();
+	// 	if (color) params.append("color", color);
+	// 	if (model) params.append("model", model);
+	// 	return `/product/get-item/${slug}?${params.toString()}`;
+	// };
 
 	// Handler for clicking a color dot
-	const handleColorClick = (e: React.MouseEvent, color: string) => {
-		e.preventDefault();
-		e.stopPropagation();
-		router.push(getColorLink(color));
-	};
+	// const handleColorClick = (e: React.MouseEvent, color: string) => {
+	// 	e.preventDefault();
+	// 	e.stopPropagation();
+	// 	router.push(getColorLink(color));
+	// };
 
 	return (
 		<Link
@@ -108,7 +108,7 @@ const ProductCard = ({
 					<p className="text-sm font-medium text-gray-900">
 						{formatPrice(price)}
 					</p>
-					{colorArray.length > 0 && (
+					{/* {colorArray.length > 0 && (
 						<div className="flex gap-1">
 							{colorArray.map((color, index) => (
 								<div
@@ -121,7 +121,7 @@ const ProductCard = ({
 								/>
 							))}
 						</div>
-					)}
+					)} */}
 				</div>
 			</div>
 		</Link>

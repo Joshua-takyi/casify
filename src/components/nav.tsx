@@ -4,6 +4,7 @@ import SearchComponent from "@/components/search";
 import Link from "next/link";
 import CartSheet from "@/components/cartComponent";
 import AccountDropdown from "./dropdown";
+import SignOutBtn from "@/app/(with-nav)/components/signOutBtn";
 // import AnnouncementBar from "./announcementBar";
 
 export default function Nav() {
@@ -36,20 +37,21 @@ export default function Nav() {
 								AirPods Cases
 							</Link>
 						</li>
-						<li className="border-l border-gray-300 pl-6">
+						{/* <li className="border-l border-gray-300 pl-6">
 							<Link
 								href={`/collection?category=airpod-cases&available=true&limit=20`}
 								className="hover:text-gray-900 transition-colors duration-200"
 							>
 								Featured
 							</Link>
-						</li>
+						</li> */}
 					</ul>
 
 					<div className="flex items-center space-x-4">
 						<AccountDropdown />
 						<SearchComponent />
 						<CartSheet />
+						<SignOutBtn />
 					</div>
 				</Wrapper>
 			</nav>

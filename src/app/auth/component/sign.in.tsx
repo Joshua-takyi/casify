@@ -6,6 +6,7 @@ import { SignInAction } from "@/server/action";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
+import { localCartStorage, mergeCartsOnServer } from "@/utils/cartStorage";
 
 const SignIn = () => {
 	const router = useRouter();
@@ -36,6 +37,27 @@ const SignIn = () => {
 		setServerError("");
 		try {
 			const response: SignInResponse = await SignInAction(data);
+			if (response?.success) {
+				// Check if user came from checkout
+				const checkoutRedirect = sessionStorage.getItem("checkoutRedirect");
+				sessionStorage.removeItem("checkoutRedirect");
+
+				if (checkoutRedirect) {
+					// Merge local cart with server cart
+					const localCart = localCartStorage.getCart();
+					if (localCart.length > 0) {
+						// Implement server-side cart merge
+						await mergeCartsOnServer(localCart);
+						localCartStorage.clearCart();
+					}
+					router.push("/cart");
+				} else {
+					router.push("/");
+				}
+
+				toast.success("Welcome back!");
+				reset();
+			}
 			if (response?.success) {
 				toast.success("Welcome back! You've successfully signed in.");
 				reset();
