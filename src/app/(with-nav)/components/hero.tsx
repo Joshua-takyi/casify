@@ -71,7 +71,7 @@ export default function HeroSection() {
 				{/* Optimized background image using Next.js Image component */}
 				<div className="absolute inset-0">
 					<Image
-						src="/images/yellow.jpg"
+						src="/images/sunset.jpg"
 						alt="Background"
 						fill
 						priority // Preload the image
