@@ -84,6 +84,7 @@ export const SelectCategories = [
 	},
 	{
 		label: "Power & Charging",
+		value: "power-charging",
 		items: [
 			{
 				label: "Charging Cables",

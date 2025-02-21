@@ -77,8 +77,9 @@ export default function SearchComponent() {
 			<button
 				onClick={() => setIsOpen(true)}
 				aria-expanded={isOpen}
+				title="search"
 				aria-label="Toggle search"
-				className="p-2 hover:bg-[#f4f4f4] rounded-full transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#e4e4e4]"
+				className="p-2 hover:bg-[#f4f4f4] rounded-full transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#e4e4e4] cursor-pointer"
 			>
 				<MagnifyingGlassIcon className="w-5 h-5 text-gray-700" />
 			</button>

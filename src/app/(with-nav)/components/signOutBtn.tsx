@@ -4,7 +4,7 @@ import { Loader } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function SignOutBtn() {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -23,10 +23,6 @@ export default function SignOutBtn() {
 			setIsLoading(false);
 		}
 	};
-
-	useEffect(() => {
-		// This effect will re-run whenever the session status changes
-	}, [session]);
 
 	// Show loading spinner while checking session status
 	if (status === "loading") {

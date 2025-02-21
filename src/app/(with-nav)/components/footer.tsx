@@ -1,12 +1,12 @@
 "use client";
 
 import Wrapper from "@/components/wrapper";
+import { SelectCategories } from "@/database/db";
 import { EnvelopeIcon, MapIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-
 export default function Footer() {
 	return (
-		<footer className="bg-[#f5f5f7]">
+		<footer className="bg-[#f5f5f7] md:my-10">
 			<Wrapper>
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 					{/* Categories Grid */}
@@ -16,12 +16,21 @@ export default function Footer() {
 							<h3 className="font-semibold">Shop and Learn</h3>
 							<ul className="space-y-3">
 								<li>
-									<Link
-										href="/store"
-										className="text-gray-500 hover:text-gray-700"
-									>
-										Store
-									</Link>
+									{SelectCategories.map((category) => (
+										<div key={category.label}>
+											{category.items
+												.sort((a, b) => a.label.localeCompare(b.label))
+												.map((item) => (
+													<Link
+														key={item.label}
+														href={`/collection?category=${item.value}&available=true&limit=20`}
+														className="text-gray-500 hover:text-gray-700 flex flex-col gap-2"
+													>
+														{item.label}
+													</Link>
+												))}
+										</div>
+									))}
 								</li>
 								<li>
 									<Link
@@ -83,27 +92,6 @@ export default function Footer() {
 						</div>
 
 						{/* Social */}
-						<div className="space-y-4">
-							<h3 className="font-semibold">Follow Us</h3>
-							<div className="flex gap-3">
-								<a
-									href="https://instagram.com/casify"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:text-gray-700"
-								>
-									{/* <Instagram className="w-3 h-3" /> */}
-								</a>
-								<a
-									href="https://twitter.com/casify"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:text-gray-700"
-								>
-									{/* <Twitter className="w-3 h-3" /> */}
-								</a>
-							</div>
-						</div>
 					</div>
 
 					{/* Bottom Section */}

@@ -125,12 +125,11 @@ const api = axios.create({
 	timeout: 10000,
 	headers: { "Content-Type": "application/json" },
 });
-
 api.interceptors.response.use(
 	(response) => response,
 	async (error: AxiosError) => {
+		// Remove the redirect for 401 errors
 		if (error.response?.status === 401) {
-			window.location.href = "/auth/sign-in";
 			return Promise.reject(error);
 		}
 		if (error.response?.status === 429) {
@@ -337,7 +336,7 @@ const CartSheet: React.FC = () => {
 	const {
 		data: cartData,
 		isLoading: isCartLoading,
-		error: cartError,
+		// error: cartError,
 		refetch,
 	} = useQuery<{ data: CartData }>({
 		queryKey: ["cartData"],
@@ -539,16 +538,16 @@ const CartSheet: React.FC = () => {
 	/*     Render Component  */
 	/* --------------------- */
 
-	if (cartError) {
-		return (
-			<Alert variant="destructive">
-				<AlertCircle className="h-4 w-4" />
-				<AlertDescription>
-					Failed to load cart. Please refresh the page.
-				</AlertDescription>
-			</Alert>
-		);
-	}
+	// if (cartError) {
+	// 	return (
+	// 		<Alert variant="destructive">
+	// 			<AlertCircle className="h-4 w-4" />
+	// 			<AlertDescription>
+	// 				Failed to load cart. Please refresh the page.
+	// 			</AlertDescription>
+	// 		</Alert>
+	// 	);
+	// }
 
 	return (
 		<>
@@ -556,9 +555,11 @@ const CartSheet: React.FC = () => {
 				<Button
 					variant="ghost"
 					size="icon"
+					title="shopping cart"
 					onClick={() => setIsOpen(true)}
 					disabled={isCartLoading}
 					aria-label="Shopping cart"
+					className="cursor-pointer"
 				>
 					<ShoppingCart className="w-6 h-6" />
 					{itemCount > 0 && (

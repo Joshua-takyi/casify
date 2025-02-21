@@ -1,7 +1,7 @@
 import HeroSection from "@/app/(with-nav)/components/hero";
 import Category from "@/app/(with-nav)/components/category";
 import FeaturedProducts from "./components/featuredProducts";
-import Testimonials from "./components/testimonials";
+// import Testimonials from "./components/testimonials";
 import BudCases from "./components/airpodCases";
 import PowerSection from "./components/power";
 import { StrapsSection } from "./components/straps";
@@ -19,7 +19,7 @@ export default function HomePage() {
 			<BudCases />
 			<StrapsSection />
 			<PowerSection />
-			<Testimonials />
+			{/* <Testimonials /> */}
 		</main>
 	);
 }

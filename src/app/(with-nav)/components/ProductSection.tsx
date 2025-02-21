@@ -89,7 +89,7 @@ const ProductSection = ({
 				</div>
 
 				{/* Product Grid */}
-				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 					{data.slice(0, MAX_ITEMS).map((product: ProductCardProps) => (
 						<ProductCard key={product._id} {...product} className={`border`} />
 					))}
