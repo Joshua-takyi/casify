@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
 // Helper Functions
 const formatPrice = (price: number, currency = "GHS"): string => {
@@ -23,7 +23,7 @@ export interface ProductCardProps {
 	price: number;
 	images: string | string[];
 	slug: string;
-	// colors?: string | string[];
+	colors?: string | string[];
 	model?: string;
 	isNew?: boolean;
 	className?: string;
@@ -36,7 +36,7 @@ const ProductCard = ({
 	images,
 	slug,
 	// colors = [],
-	model = "",
+	// model = "",
 	className,
 	isNew = false,
 }: ProductCardProps) => {
@@ -45,7 +45,7 @@ const ProductCard = ({
 	// const colorArray = Array.isArray(colors) ? colors : colors ? [colors] : [];
 	// const router = useRouter();
 
-	// // Function to generate a URL for a given color and model
+	// Function to generate a URL for a given color and model
 	// const getColorLink = (color: string): string => {
 	// 	const params = new URLSearchParams();
 	// 	if (color) params.append("color", color);
@@ -63,7 +63,7 @@ const ProductCard = ({
 	return (
 		<Link
 			href={`/product/${slug}`}
-			className={`group relative block w-full bg-transparent  ${className}`}
+			className={`group relative block w-full bg-transparent  rounded-lg ${className}`}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 		>

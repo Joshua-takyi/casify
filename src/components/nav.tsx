@@ -37,7 +37,7 @@ export default function Nav() {
 						</li>
 						<li className="border-l border-gray-300 pl-6">
 							<Link
-								href={`/collection?category=airpod-cases&available=true&limit=20`}
+								href={`/collection?featured=true`}
 								className="hover:text-gray-900 transition-colors duration-200"
 							>
 								Featured
